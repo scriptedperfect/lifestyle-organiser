@@ -1,0 +1,595 @@
+<title>Lifestyle Organiser</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1b0f33">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one-column phone app on deep purple; lock screen, three tabs, bottom sheets for forms and settings */
+:root{
+  --bg:#1b0f33; --bg-hi:#2d1760; --card:#2a1a55; --card-2:#342266; --ink:#f4effe; --muted:#b9abdd; --rule:#40306f;
+  --accent:#b993ff; --accent-ink:#1b0f33; --accent-soft:rgba(185,147,255,.16);
+  --amber:#ffc56e; --amber-soft:rgba(255,197,110,.15); --red:#ff8f8f; --red-soft:rgba(255,143,143,.15); --ok:#86e3ae; --ok-soft:rgba(134,227,174,.15);
+  --display:"Sora",ui-sans-serif,system-ui,sans-serif;
+  --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg) radial-gradient(120% 60% at 50% -10%,var(--bg-hi),var(--bg) 70%) no-repeat fixed;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 80px;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.icon-btn{border:1px solid var(--rule);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;cursor:pointer;flex:none}
+.icon-btn svg{width:20px;height:20px}
+.datechip{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--card);border:1px solid var(--rule);padding:4px;border-radius:14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tabs button{border:0;background:transparent;color:var(--muted);font:700 14px var(--body);padding:10px 4px;border-radius:10px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+.banner{background:var(--amber-soft);border:1px solid rgba(255,197,110,.35);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:12px}
+.tile .lab{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.tile .val{font-family:var(--mono);font-size:19px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tile .note{font-size:12px;color:var(--muted)}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button,.chip{border:0;background:transparent;color:var(--muted);font:600 13px var(--body);padding:7px 13px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.chip{border:1px solid var(--rule);border-radius:999px}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 14px var(--body);padding:10px 15px;border-radius:12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{font-size:13px;padding:6px 11px;border-radius:9px}
+.btn.danger{background:transparent;border-color:var(--red);color:var(--red)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+.quick{display:flex;gap:8px}
+.quick input{flex:1;min-width:0}
+input,select,textarea{font:15px var(--body);color:var(--ink);background:var(--card-2);border:1px solid var(--rule);border-radius:11px;padding:11px 12px;width:100%}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{min-height:70px;resize:vertical}
+
+.list{background:var(--card);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
+.group-h{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);padding:12px 14px 6px;border-bottom:1px solid var(--rule)}
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--rule)}
+.task:last-child{border-bottom:0}
+.check{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--accent);background:transparent;cursor:pointer;margin-top:1px;display:grid;place-items:center;color:var(--accent-ink);font-size:14px;padding:0}
+.check[aria-checked="true"]{background:var(--accent)}
+.task .body{flex:1;min-width:0;cursor:pointer}
+.task .t{font-weight:600;overflow-wrap:anywhere}
+.task.done .t{text-decoration:line-through;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:12px;color:var(--muted);align-items:center}
+.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.high,.pill.over{background:var(--red-soft);color:var(--red)}
+.pill.med,.pill.soon{background:var(--amber-soft);color:var(--amber)}
+.pill.low{background:var(--accent-soft);color:var(--muted)}
+.pill.paid{background:var(--ok-soft);color:var(--ok)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:14px}
+
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card .name{font-family:var(--display);font-weight:500;font-size:16px;overflow-wrap:anywhere}
+.card .who{font-size:12px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px 12px}
+.kv .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kv .v{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.prog{height:6px;background:var(--accent-soft);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.hist{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.cleared{opacity:.6}
+
+/* lock screen */
+.lock{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center}
+.lock-box{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.seal{width:72px;height:72px;margin:0 auto;border-radius:22px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.seal svg{width:34px;height:34px}
+.lock-box form{display:flex;flex-direction:column;gap:10px;text-align:left}
+.pwrow{position:relative}
+.pwrow input{padding-right:64px}
+.pwrow button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--accent);font:700 12px var(--body);padding:8px;cursor:pointer}
+.rules{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12px;color:var(--muted)}
+.rules li::before{content:"○ ";color:var(--muted)}
+.rules li.ok{color:var(--ok)}
+.rules li.ok::before{content:"● ";color:var(--ok)}
+.meter{height:6px;border-radius:99px;background:var(--card-2);overflow:hidden}
+.meter i{display:block;height:100%;width:0;transition:width .2s,background .2s}
+.err{color:var(--red);font-size:13px;min-height:18px}
+.fine{font-size:12px;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font:13px var(--body);cursor:pointer;padding:4px}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(8,3,20,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);border:1px solid var(--rule);border-bottom:0;width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
+.sheet form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sheet label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+.sheet .full{grid-column:1/-1}
+.sheet .foot{grid-column:1/-1;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-top:4px}
+.sheet .foot div{display:flex;gap:8px}
+.set-sec{grid-column:1/-1;border-top:1px solid var(--rule);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.set-sec h3{margin:0;font:700 14px var(--body)}
+.set-sec p{margin:0;font-size:13px;color:var(--muted)}
+.mono-box{font-family:var(--mono);font-size:11px;word-break:break-all}
+.status{font-size:12px;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-weight:600;font-size:13px;z-index:30}
+@media (max-width:420px){.sheet form{grid-template-columns:1fr}.rules{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+</style>
+
+<div class="wrap">
+  <!-- LOCK SCREEN -->
+  <section class="lock" id="lockView">
+    <div class="lock-box">
+      <div class="seal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></div>
+      <div><h1>Lifestyle Organiser</h1><p class="sub" id="lockSub">Your to-dos, loans and savings, locked with your password.</p></div>
+
+      <form id="setupForm" hidden>
+        <label class="fine" for="pw1">Create a strong password</label>
+        <div class="pwrow"><input id="pw1" type="password" autocomplete="new-password" placeholder="At least 10 characters"><button type="button" data-show="pw1">Show</button></div>
+        <div class="meter"><i id="meter"></i></div>
+        <ul class="rules" id="rules">
+          <li data-r="len">10+ characters</li><li data-r="up">An uppercase letter</li>
+          <li data-r="low">A lowercase letter</li><li data-r="num">A number</li><li data-r="sym">A symbol (!@#…)</li>
+        </ul>
+        <label class="fine" for="pw2">Type it again</label>
+        <div class="pwrow"><input id="pw2" type="password" autocomplete="new-password"><button type="button" data-show="pw2">Show</button></div>
+        <p class="err" id="setupErr"></p>
+        <button class="btn block" id="setupBtn" type="submit" disabled>Set password and open</button>
+        <p class="fine">Your data is encrypted with this password on this phone. There is no way to recover it if you forget the password, so keep it somewhere safe.</p>
+      </form>
+
+      <form id="unlockForm" hidden>
+        <label class="fine" for="pwU">Password</label>
+        <div class="pwrow"><input id="pwU" type="password" autocomplete="current-password"><button type="button" data-show="pwU">Show</button></div>
+        <p class="err" id="unlockErr"></p>
+        <button class="btn block" id="unlockBtn" type="submit">Unlock</button>
+        <button class="linkbtn" type="button" id="forgotBtn">Forgot password?</button>
+      </form>
+
+      <div id="forgotBox" hidden class="card" style="text-align:left">
+        <p style="margin:0">Without your password the data can't be decrypted. You can erase everything and start again, or restore a backup code you saved earlier (you'll need that backup's password).</p>
+        <label class="fine" for="eraseConfirm">Type ERASE to wipe all data on this phone</label>
+        <input id="eraseConfirm" autocomplete="off">
+        <div class="actions"><button class="btn danger small" id="eraseBtn" type="button">Erase and start over</button><button class="btn ghost small" id="restoreLockBtn" type="button">Restore a backup</button><button class="btn ghost small" id="forgotBack" type="button">Back</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div id="appView" hidden style="display:contents">
+    <header class="top-row">
+      <div><span class="datechip" id="today"></span><h1>Lifestyle Organiser</h1></div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn" id="lockBtn" aria-label="Lock now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-todo" aria-selected="true" data-tab="todo">To-dos</button>
+      <button role="tab" id="tab-loans" aria-selected="false" data-tab="loans">Loans</button>
+      <button role="tab" id="tab-savings" aria-selected="false" data-tab="savings">Savings</button>
+    </nav>
+
+    <div class="banner" id="exBanner" hidden>
+      <span>These are example entries to show how it works. Clear them to start your own.</span>
+      <button class="btn small" id="clearEx">Clear examples</button>
+    </div>
+
+    <section id="view-todo"></section>
+    <section id="view-loans" hidden></section>
+    <section id="view-savings" hidden></section>
+    <p class="status" id="saveStatus"></p>
+  </div>
+</div>
+
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle"></h2>
+    <form id="sheetForm"></form>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const naira=n=>"₦"+Math.round(Number(n)||0).toLocaleString("en-NG");
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let now=new Date(); now.setHours(0,0,0,0);
+const ym=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+let thisYM=ym(now);
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parse=s=>{if(!s)return null;const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const days=(a,b)=>Math.round((a-b)/864e5);
+const ymLabel=s=>{const [y,m]=s.split("-");return MON[+m-1]+" "+y.slice(2)};
+const dueDate=(day,base)=>{const y=base.getFullYear(),m=base.getMonth();const last=new Date(y,m+1,0).getDate();return new Date(y,m,Math.min(Math.max(1,day||1),last))};
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+
+/* ================= encryption (PBKDF2 + AES-GCM, all on this device) ================= */
+const VAULT="lo-vault-v1",TRIES="lo-tries";
+const te=new TextEncoder(),td=new TextDecoder();
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const ITER=310000;
+async function deriveKey(pw,salt,iter){
+  const base=await crypto.subtle.importKey("raw",te.encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:iter||ITER,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+let KEY=null,SALT=null;
+async function sealVault(obj){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},KEY,te.encode(JSON.stringify(obj)));
+  return JSON.stringify({app:"lifestyle-organiser",v:1,iter:ITER,salt:b64(SALT),iv:b64(iv),ct:b64(ct)});
+}
+async function openVault(str,pw){
+  const v=JSON.parse(str);if(v.app!=="lifestyle-organiser")throw new Error("format");
+  const salt=unb64(v.salt);const key=await deriveKey(pw,salt,v.iter);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(v.iv)},key,unb64(v.ct));
+  return{data:JSON.parse(td.decode(pt)),key,salt};
+}
+
+/* ================= password rules ================= */
+function checkPw(p){const r={len:p.length>=10,up:/[A-Z]/.test(p),low:/[a-z]/.test(p),num:/\d/.test(p),sym:/[^A-Za-z0-9]/.test(p)};r.score=Object.values(r).filter(Boolean).length;r.ok=r.len&&r.up&&r.low&&r.num&&r.sym;return r}
+function wireStrength(i1,i2,rulesEl,meterEl,btn){
+  const upd=()=>{const r=checkPw(i1.value);rulesEl.querySelectorAll("li").forEach(li=>li.classList.toggle("ok",!!r[li.dataset.r]));
+    meterEl.style.width=(r.score/5*100)+"%";meterEl.style.background=r.score<3?"var(--red)":r.score<5?"var(--amber)":"var(--ok)";
+    btn.disabled=!(r.ok&&i1.value===i2.value)};
+  i1.oninput=upd;i2.oninput=upd;upd();
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-show]");if(!b)return;const i=document.getElementById(b.dataset.show);i.type=i.type==="password"?"text":"password";b.textContent=i.type==="password"?"Show":"Hide"});
+
+/* ================= lock screen flow ================= */
+function showLock(mode){
+  KEY=null;state=null;closeSheet();
+  $("#appView").hidden=true;$("#lockView").hidden=false;
+  $("#setupForm").hidden=mode!=="setup";$("#unlockForm").hidden=mode!=="unlock";$("#forgotBox").hidden=true;
+  $("#lockSub").textContent=mode==="setup"?"Set a password to protect your to-dos, loans and savings.":"Enter your password to open.";
+  if(mode==="setup"){wireStrength($("#pw1"),$("#pw2"),$("#rules"),$("#meter"),$("#setupBtn"));$("#pw1").value="";$("#pw2").value="";setTimeout(()=>$("#pw1").focus(),50)}
+  else{$("#pwU").value="";$("#unlockErr").textContent="";setTimeout(()=>$("#pwU").focus(),50)}
+}
+function showApp(){$("#lockView").hidden=true;$("#appView").hidden=false;$("#appView").style.display="contents";render()}
+
+$("#setupForm").onsubmit=async e=>{
+  e.preventDefault();const p=$("#pw1").value;if(!checkPw(p).ok||p!==$("#pw2").value)return;
+  $("#setupBtn").disabled=true;$("#setupBtn").textContent="Securing…";
+  SALT=crypto.getRandomValues(new Uint8Array(16));KEY=await deriveKey(p,SALT);
+  state=examples();await persistNow();$("#pw1").value=$("#pw2").value="";
+  $("#setupBtn").textContent="Set password and open";showApp();toast("Password set");
+};
+$("#unlockForm").onsubmit=async e=>{
+  e.preventDefault();
+  const t=JSON.parse(ls.get(TRIES)||'{"n":0,"until":0}');
+  if(Date.now()<t.until){$("#unlockErr").textContent="Too many wrong attempts. Try again in "+Math.ceil((t.until-Date.now())/1000)+" seconds.";return}
+  $("#unlockBtn").disabled=true;$("#unlockBtn").textContent="Unlocking…";
+  try{const r=await openVault(ls.get(VAULT),$("#pwU").value);KEY=r.key;SALT=r.salt;state=normalize(r.data);ls.del(TRIES);$("#pwU").value="";showApp()}
+  catch(err){t.n++;if(t.n>=5){t.until=Date.now()+30000*Math.pow(2,Math.min(t.n-5,5))}ls.set(TRIES,JSON.stringify(t));
+    $("#unlockErr").textContent=t.n>=5?"Wrong password. Locked for "+Math.round((t.until-Date.now())/1000)+" seconds.":"Wrong password. "+(5-t.n)+" tries before a short lockout."}
+  $("#unlockBtn").disabled=false;$("#unlockBtn").textContent="Unlock";
+};
+$("#forgotBtn").onclick=()=>{$("#unlockForm").hidden=true;$("#forgotBox").hidden=false;$("#eraseConfirm").value=""};
+$("#forgotBack").onclick=()=>showLock("unlock");
+$("#eraseBtn").onclick=()=>{if($("#eraseConfirm").value.trim()!=="ERASE"){toast("Type ERASE to confirm");return}ls.del(VAULT);ls.del(TRIES);showLock("setup");toast("All data erased")};
+$("#restoreLockBtn").onclick=()=>openRestore(true);
+
+/* auto-lock after 60 seconds in the background */
+let hiddenAt=0;
+document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(KEY&&hiddenAt&&Date.now()-hiddenAt>60000){showLock("unlock")}
+  if(!document.hidden){const n=new Date();n.setHours(0,0,0,0);if(+n!==+now){now=n;thisYM=ym(now);if(KEY)render()}}});
+
+/* ================= data ================= */
+function monthsBetween(startIso,endYM){const out=[];let d=parse(startIso);d=new Date(d.getFullYear(),d.getMonth(),1);while(ym(d)<=endYM){out.push(ym(d));d.setMonth(d.getMonth()+1)}return out}
+function examples(){
+  const lastMonth=ym(new Date(now.getFullYear(),now.getMonth()-1,1));
+  const plus=n=>iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()+n));
+  return{examples:true,
+ tasks:[
+  {id:uid(),title:"Finish episode script draft",space:"Work",project:"Content",priority:"High",due:plus(0),done:false,notes:""},
+  {id:uid(),title:"Send brand-ad quotation to client",space:"Work",project:"Client jobs",priority:"High",due:plus(-1),done:false,notes:""},
+  {id:uid(),title:"Fix game level 2 bugs",space:"Work",project:"Apps & Games",priority:"Medium",due:plus(3),done:false,notes:""},
+  {id:uid(),title:"Reconcile October bank statement",space:"Work",project:"Accounting",priority:"Medium",due:plus(5),done:false,notes:""},
+  {id:uid(),title:"Ideas: new series title options",space:"Work",project:"Content",priority:"Low",due:"",done:false,notes:""},
+  {id:uid(),title:"Pay electricity bill",space:"Personal",project:"Home",priority:"High",due:plus(1),done:false,notes:""},
+  {id:uid(),title:"Book dental check-up",space:"Personal",project:"Health",priority:"Low",due:plus(9),done:false,notes:""},
+  {id:uid(),title:"Buy groceries",space:"Personal",project:"Errands",priority:"Medium",due:plus(-2),done:true,notes:""}],
+ loans:[
+  {id:uid(),name:"Car loan",lender:"Example Bank",principal:3000000,rate:18,monthly:125000,dueDay:25,start:"2025-06-01",months:30,total:3750000,payments:monthsBetween("2025-06-01",lastMonth),notes:""},
+  {id:uid(),name:"Equipment loan",lender:"Example Microfinance",principal:800000,rate:15,monthly:72000,dueDay:5,start:"2026-03-01",months:12,total:864000,payments:monthsBetween("2026-03-01",thisYM),notes:""}],
+ savings:[
+  {id:uid(),name:"Emergency fund",kind:"Savings",where:"Savings app",balance:450000,monthly:50000,rate:12,dueDay:28,maturity:"",contributions:[lastMonth],notes:""},
+  {id:uid(),name:"Treasury bills",kind:"Investment",where:"Example Bank",balance:1000000,monthly:0,rate:18,dueDay:0,maturity:"2027-01-15",contributions:[],notes:""}]
+}}
+function normalize(d){const s=JSON.parse(JSON.stringify(d||{}));s.tasks=s.tasks||[];s.loans=s.loans||[];s.savings=s.savings||[];s.examples=!!s.examples;return s}
+
+let state=null;
+let ui={tab:"todo",space:"All",filter:"Today"};
+try{const t=ls.get("lo-ui");if(t)ui=Object.assign(ui,JSON.parse(t))}catch(e){}
+const saveUI=()=>ls.set("lo-ui",JSON.stringify(ui));
+
+let saveTimer=null,chain=Promise.resolve();
+const status=t=>{$("#saveStatus").textContent=t};
+async function persistNow(){if(!KEY||!state)return;const s=await sealVault(state);if(!ls.set(VAULT,s))status("Couldn't save. Phone storage may be full.");else status("Saved and encrypted on this phone")}
+function persist(){clearTimeout(saveTimer);status("Saving…");saveTimer=setTimeout(()=>{chain=chain.then(persistNow).catch(()=>status("Couldn't save"))},400)}
+function change(fn){fn();render();persist()}
+
+/* ================= maths ================= */
+function loanInfo(l){
+  const total=Number(l.total)||Number(l.monthly)*Number(l.months)||0;
+  const paidCount=(l.payments||[]).length;
+  const paid=Math.min(total,paidCount*Number(l.monthly||0));
+  const balance=Math.max(0,total-paid);
+  const cleared=total>0&&balance<=0;
+  const paidThis=(l.payments||[]).includes(thisYM);
+  const due=paidThis?dueDate(l.dueDay,new Date(now.getFullYear(),now.getMonth()+1,1)):dueDate(l.dueDay,now);
+  const d=days(due,now);
+  let pill;
+  if(cleared)pill=["paid","Cleared"];
+  else if(paidThis)pill=["paid",MON[now.getMonth()]+" paid"];
+  else if(d<0)pill=["over","Overdue "+(-d)+"d"];
+  else if(d<=7)pill=["soon",d===0?"Due today":"Due in "+d+"d"];
+  else pill=["","Due "+due.getDate()+" "+MON[due.getMonth()]];
+  const remainingMonths=l.monthly>0?Math.ceil(balance/l.monthly):0;
+  return{total,paid,balance,cleared,paidThis,due,d,pill,annual:Number(l.monthly||0)*12,remainingMonths,pct:total?paid/total*100:0};
+}
+function saveInfo(s){
+  const done=(s.contributions||[]).includes(thisYM);
+  const hasPlan=Number(s.monthly)>0&&Number(s.dueDay)>0;
+  let pill=null;
+  if(hasPlan){const due=dueDate(s.dueDay,now),d=days(due,now);
+    pill=done?["paid",MON[now.getMonth()]+" added"]:d<0?["over","Overdue "+(-d)+"d"]:d<=7?["soon",d===0?"Due today":"Due in "+d+"d"]:["","Due "+due.getDate()+" "+MON[due.getMonth()]]}
+  const mat=parse(s.maturity);
+  return{done,hasPlan,pill,yearly:Number(s.balance||0)*Number(s.rate||0)/100,matDays:mat?days(mat,now):null,mat};
+}
+
+/* ================= rendering ================= */
+function render(){
+  if(!state)return;
+  $("#today").textContent=now.toLocaleDateString("en-NG",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+  $("#exBanner").hidden=!state.examples;
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===ui.tab));
+  ["todo","loans","savings"].forEach(t=>$("#view-"+t).hidden=ui.tab!==t);
+  if(ui.tab==="todo")renderTodo();if(ui.tab==="loans")renderLoans();if(ui.tab==="savings")renderSavings();
+}
+function taskMatches(t){
+  if(ui.space!=="All"&&t.space!==ui.space)return false;
+  const due=parse(t.due),d=due?days(due,now):null;
+  switch(ui.filter){
+    case "Today":return !t.done&&d!==null&&d<=0;
+    case "This week":return !t.done&&d!==null&&d<=7;
+    case "Inbox":return !t.done&&!t.due;
+    case "Done":return t.done;
+    default:return !t.done;
+  }
+}
+const PRI={High:0,Medium:1,Low:2};
+function renderTodo(){
+  const open=state.tasks.filter(t=>!t.done);
+  const dd=t=>days(parse(t.due),now);
+  const overdue=open.filter(t=>t.due&&dd(t)<0).length, today=open.filter(t=>t.due&&dd(t)===0).length, week=open.filter(t=>t.due&&dd(t)>=0&&dd(t)<=7).length;
+  const list=state.tasks.filter(taskMatches).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||PRI[a.priority]-PRI[b.priority]);
+  const groups={};list.forEach(t=>{const k=t.space+" · "+(t.project||"General");(groups[k]=groups[k]||[]).push(t)});
+  const projects=[...new Set(state.tasks.map(t=>t.project).filter(Boolean))];
+  $("#view-todo").innerHTML=`
+  <div class="cards">
+   <div class="tiles">
+    <div class="tile"><div class="lab">Overdue</div><div class="val" style="color:${overdue?"var(--red)":"inherit"}">${overdue}</div></div>
+    <div class="tile"><div class="lab">Due today</div><div class="val">${today}</div></div>
+    <div class="tile"><div class="lab">Next 7 days</div><div class="val">${week}</div></div>
+    <div class="tile"><div class="lab">Open in total</div><div class="val">${open.length}</div></div>
+   </div>
+   <form class="quick" id="quickAdd"><input id="quickInput" placeholder="Quick add a to-do" aria-label="Quick add a to-do"><button class="btn" type="submit">Add</button></form>
+   <div class="bar"><div class="seg">${["All","Work","Personal"].map(s=>`<button data-space="${s}" aria-pressed="${ui.space===s}">${s}</button>`).join("")}</div>
+    <button class="btn ghost small" id="newTask" style="margin-left:auto">+ Detailed to-do</button></div>
+   <div class="bar">${["Today","This week","All open","Inbox","Done"].map(f=>`<button class="chip" data-filter="${f}" aria-pressed="${ui.filter===f}">${f}</button>`).join("")}</div>
+   <div class="list">${list.length?Object.entries(groups).map(([g,ts])=>`<div class="group-h">${esc(g)}</div>`+ts.map(taskRow).join("")).join(""):
+     `<div class="empty">${ui.filter==="Today"?"Nothing due today. Check This week or add a to-do above.":ui.filter==="Inbox"?"Inbox is clear. Quick-added to-dos without a date land here.":"No to-dos here yet."}</div>`}</div>
+   <datalist id="projList">${projects.map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
+  </div>`;
+  $("#quickAdd").onsubmit=e=>{e.preventDefault();const v=$("#quickInput").value.trim();if(!v)return;
+    change(()=>state.tasks.unshift({id:uid(),title:v,space:ui.space==="All"?"Work":ui.space,project:"",priority:"Medium",due:ui.filter==="Today"?iso(now):"",done:false,notes:""}));
+    setTimeout(()=>{const i=$("#quickInput");i&&i.focus()},0)};
+  document.querySelectorAll("[data-space]").forEach(b=>b.onclick=()=>{ui.space=b.dataset.space;saveUI();render()});
+  document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{ui.filter=b.dataset.filter;saveUI();render()});
+  $("#newTask").onclick=()=>openForm("task");
+  document.querySelectorAll(".task .check").forEach(b=>b.onclick=()=>change(()=>{const t=state.tasks.find(x=>x.id===b.dataset.id);t.done=!t.done}));
+  document.querySelectorAll(".task .body").forEach(b=>{const go=()=>openForm("task",state.tasks.find(x=>x.id===b.dataset.id));b.onclick=go;b.onkeydown=e=>{if(e.key==="Enter")go()}});
+}
+function taskRow(t){
+  const due=parse(t.due);let dp="";
+  if(due&&!t.done){const d=days(due,now);dp=d<0?`<span class="pill over">${-d}d overdue</span>`:d===0?`<span class="pill soon">Today</span>`:`<span>${due.getDate()} ${MON[due.getMonth()]}</span>`}
+  else if(due)dp=`<span>${due.getDate()} ${MON[due.getMonth()]}</span>`;
+  const pc={High:"high",Medium:"med",Low:"low"}[t.priority]||"low";
+  return`<div class="task ${t.done?"done":""}"><button class="check" role="checkbox" aria-checked="${t.done}" aria-label="Mark ${esc(t.title)} done" data-id="${t.id}">${t.done?"✓":""}</button>
+  <div class="body" data-id="${t.id}" tabindex="0"><div class="t">${esc(t.title)}</div><div class="meta"><span class="pill ${pc}">${esc(t.priority)}</span>${dp}${t.notes?`<span>· has notes</span>`:""}</div></div></div>`;
+}
+function renderLoans(){
+  const infos=state.loans.map(l=>[l,loanInfo(l)]);
+  const active=infos.filter(([,i])=>!i.cleared);
+  const totMonthly=active.reduce((a,[l])=>a+Number(l.monthly||0),0);
+  const totOut=active.reduce((a,[,i])=>a+i.balance,0);
+  const unpaidAmt=active.filter(([,i])=>!i.paidThis).reduce((a,[l])=>a+Number(l.monthly||0),0);
+  const next=active.slice().sort((a,b)=>a[1].due-b[1].due)[0];
+  infos.sort((a,b)=>(a[1].cleared-b[1].cleared)||(a[1].due-b[1].due));
+  const M=MON[now.getMonth()];
+  $("#view-loans").innerHTML=`
+  <div class="cards">
+   <div class="tiles">
+    <div class="tile"><div class="lab">Monthly repayments</div><div class="val">${naira(totMonthly)}</div><div class="note">${active.length} active loan${active.length===1?"":"s"}</div></div>
+    <div class="tile"><div class="lab">Per year</div><div class="val">${naira(totMonthly*12)}</div><div class="note">monthly × 12</div></div>
+    <div class="tile"><div class="lab">Total outstanding</div><div class="val">${naira(totOut)}</div></div>
+    <div class="tile"><div class="lab">Still to pay in ${M}</div><div class="val" style="color:${unpaidAmt?"var(--amber)":"var(--ok)"}">${naira(unpaidAmt)}</div><div class="note">${next?"Next: "+esc(next[0].name)+", "+next[1].due.getDate()+" "+MON[next[1].due.getMonth()]:"Nothing due"}</div></div>
+   </div>
+   <div class="bar"><h2>Your loans</h2><button class="btn small" id="addLoan" style="margin-left:auto">+ Add loan</button></div>
+   ${infos.length?infos.map(([l,i])=>`
+   <article class="card ${i.cleared?"cleared":""}">
+    <div class="top"><div><div class="name">${esc(l.name)}</div><div class="who">${esc(l.lender||"")}${l.rate?` · ${l.rate}% p.a.`:""}</div></div><span class="pill ${i.pill[0]}">${i.pill[1]}</span></div>
+    <div class="kv">
+     <div><div class="k">Monthly</div><div class="v">${naira(l.monthly)}</div></div>
+     <div><div class="k">Per year</div><div class="v">${naira(i.annual)}</div></div>
+     <div><div class="k">Balance left</div><div class="v">${naira(i.balance)}</div></div>
+     <div><div class="k">Due day</div><div class="v">${l.dueDay||"–"} monthly</div></div>
+    </div>
+    <div class="prog" aria-label="${Math.round(i.pct)}% repaid"><i style="width:${i.pct.toFixed(1)}%"></i></div>
+    <div class="hist">${naira(i.paid)} repaid of ${naira(i.total)} · ${(l.payments||[]).length} payment${(l.payments||[]).length===1?"":"s"}${i.cleared?"":` · about ${i.remainingMonths} month${i.remainingMonths===1?"":"s"} left`}${(l.payments||[]).length?`<br>Recent: ${(l.payments||[]).slice().sort().slice(-4).map(ymLabel).join(", ")}`:""}</div>
+    <div class="actions">${i.cleared?"":`<button class="btn small ${i.paidThis?"ghost":""}" data-pay="${l.id}">${i.paidThis?"Undo "+M+" payment":"Mark "+M+" paid"}</button>`}
+     <button class="btn ghost small" data-hist="${l.id}">Payments</button><button class="btn ghost small" data-editloan="${l.id}">Edit</button></div>
+   </article>`).join(""):`<div class="list"><div class="empty">No loans added. Tap “Add loan” to record one with its monthly repayment and due day.</div></div>`}
+  </div>`;
+  $("#addLoan").onclick=()=>openForm("loan");
+  document.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>change(()=>{const l=state.loans.find(x=>x.id===b.dataset.pay);l.payments=l.payments||[];
+    l.payments=l.payments.includes(thisYM)?l.payments.filter(m=>m!==thisYM):[...l.payments,thisYM]}));
+  document.querySelectorAll("[data-editloan]").forEach(b=>b.onclick=()=>openForm("loan",state.loans.find(x=>x.id===b.dataset.editloan)));
+  document.querySelectorAll("[data-hist]").forEach(b=>b.onclick=()=>openHistory(state.loans.find(x=>x.id===b.dataset.hist)));
+}
+function renderSavings(){
+  const infos=state.savings.map(s=>[s,saveInfo(s)]);
+  const tot=infos.reduce((a,[s])=>a+Number(s.balance||0),0);
+  const sav=infos.filter(([s])=>s.kind==="Savings").reduce((a,[s])=>a+Number(s.balance||0),0);
+  const monthly=infos.reduce((a,[s])=>a+Number(s.monthly||0),0);
+  const yearly=infos.reduce((a,[,i])=>a+i.yearly,0);
+  const M=MON[now.getMonth()];
+  $("#view-savings").innerHTML=`
+  <div class="cards">
+   <div class="tiles">
+    <div class="tile"><div class="lab">Total saved & invested</div><div class="val">${naira(tot)}</div><div class="note">Savings ${naira(sav)} · Investments ${naira(tot-sav)}</div></div>
+    <div class="tile"><div class="lab">Monthly contributions</div><div class="val">${naira(monthly)}</div><div class="note">${naira(monthly*12)} per year</div></div>
+    <div class="tile"><div class="lab">Est. yearly return</div><div class="val">${naira(yearly)}</div><div class="note">balance × rate, before tax</div></div>
+   </div>
+   <div class="bar"><h2>Savings & investments</h2><button class="btn small" id="addSaving" style="margin-left:auto">+ Add</button></div>
+   ${infos.length?infos.map(([s,i])=>`
+   <article class="card">
+    <div class="top"><div><div class="name">${esc(s.name)}</div><div class="who">${esc(s.kind)}${s.where?" · "+esc(s.where):""}${s.rate?` · ${s.rate}% p.a.`:""}</div></div>${i.pill?`<span class="pill ${i.pill[0]}">${i.pill[1]}</span>`:""}</div>
+    <div class="kv">
+     <div><div class="k">Balance</div><div class="v">${naira(s.balance)}</div></div>
+     <div><div class="k">Monthly</div><div class="v">${s.monthly?naira(s.monthly):"–"}</div></div>
+     <div><div class="k">Yearly return</div><div class="v">${naira(i.yearly)}</div></div>
+     <div><div class="k">${i.mat?"Matures":"Due day"}</div><div class="v">${i.mat?i.mat.getDate()+" "+MON[i.mat.getMonth()]+" "+String(i.mat.getFullYear()).slice(2)+(i.matDays>=0?` (${i.matDays}d)`:" (matured)"):(s.dueDay?s.dueDay+" monthly":"–")}</div></div>
+    </div>
+    <div class="actions">${i.hasPlan?`<button class="btn small ${i.done?"ghost":""}" data-contrib="${s.id}">${i.done?"Undo "+M+" contribution":"Add "+M+" contribution (+"+naira(s.monthly)+")"}</button>`:""}
+     <button class="btn ghost small" data-editsave="${s.id}">Edit</button></div>
+   </article>`).join(""):`<div class="list"><div class="empty">Nothing added yet. Add a savings plan or an investment to track its balance and returns.</div></div>`}
+  </div>`;
+  $("#addSaving").onclick=()=>openForm("saving");
+  document.querySelectorAll("[data-contrib]").forEach(b=>b.onclick=()=>change(()=>{const s=state.savings.find(x=>x.id===b.dataset.contrib);s.contributions=s.contributions||[];
+    if(s.contributions.includes(thisYM)){s.contributions=s.contributions.filter(m=>m!==thisYM);s.balance=Number(s.balance||0)-Number(s.monthly||0)}
+    else{s.contributions=[...s.contributions,thisYM];s.balance=Number(s.balance||0)+Number(s.monthly||0)}}));
+  document.querySelectorAll("[data-editsave]").forEach(b=>b.onclick=()=>openForm("saving",state.savings.find(x=>x.id===b.dataset.editsave)));
+}
+
+/* ================= sheets ================= */
+const FIELDS={
+ task:[["title","To-do","text",1],["space","Space","select",0,["Work","Personal"]],["project","Project","text",0,null,"projList"],["priority","Priority","select",0,["High","Medium","Low"]],["due","Due date","date"],["notes","Notes","textarea",1]],
+ loan:[["name","Loan name","text",1],["lender","Lender","text"],["principal","Amount borrowed (₦)","number"],["rate","Interest rate (% a year)","number"],["monthly","Monthly repayment (₦)","number"],["dueDay","Due day of month (1–31)","number"],["start","Start date","date"],["months","Tenor (months)","number"],["total","Total to repay (₦)","number",1],["notes","Notes","textarea",1]],
+ saving:[["name","Name","text",1],["kind","Type","select",0,["Savings","Investment"]],["where","Where (bank, app)","text"],["balance","Current balance (₦)","number"],["monthly","Monthly contribution (₦)","number"],["rate","Interest / return (% a year)","number"],["dueDay","Contribution day (1–31)","number"],["maturity","Maturity date","date"],["notes","Notes","textarea",1]]
+};
+const TITLES={task:"to-do",loan:"loan",saving:"savings or investment"};
+const COLL={task:"tasks",loan:"loans",saving:"savings"};
+let sheetKind=null,sheetItem=null;
+function openSheet(title,html){$("#sheetTitle").textContent=title;$("#sheetForm").innerHTML=html;$("#sheetBg").hidden=false}
+function closeSheet(){$("#sheetBg").hidden=true;$("#sheetForm").innerHTML="";$("#sheetForm").onsubmit=null}
+function openForm(kind,item){
+  sheetKind=kind;sheetItem=item||null;
+  const v=item||(kind==="task"?{space:ui.space==="All"?"Work":ui.space,priority:"Medium"}:kind==="saving"?{kind:"Savings"}:{});
+  openSheet((item?"Edit ":"New ")+TITLES[kind],FIELDS[kind].map(([k,l,t,full,opts,list])=>{
+    const val=esc(v[k]??""),id="f-"+kind+"-"+k;
+    const ctl=t==="select"?`<select id="${id}" name="${k}">${opts.map(o=>`<option ${v[k]===o?"selected":""}>${o}</option>`).join("")}</select>`:
+      t==="textarea"?`<textarea id="${id}" name="${k}">${val}</textarea>`:
+      `<input id="${id}" name="${k}" type="${t}" value="${val}" ${t==="number"?'inputmode="decimal" step="any" min="0"':""} ${list?`list="${list}"`:""} ${k==="title"||k==="name"?"required":""}>`;
+    const hint=kind==="loan"&&k==="total"?`<span>Leave blank to use monthly × tenor.</span>`:"";
+    return`<label class="${full?"full":""}" for="${id}">${l}${ctl}${hint}</label>`}).join("")+
+   `<div class="foot">${item?`<button type="button" class="btn danger small" id="delBtn">Delete</button>`:"<span></span>"}<div><button type="button" class="btn ghost" id="cancelBtn">Cancel</button><button type="submit" class="btn">Save</button></div></div>`);
+  $("#cancelBtn").onclick=closeSheet;
+  const del=$("#delBtn");if(del){let armed=false,tm;del.onclick=()=>{if(!armed){armed=true;del.textContent="Tap again to delete";tm=setTimeout(()=>{armed=false;del.textContent="Delete"},3000);return}
+    clearTimeout(tm);change(()=>{state[COLL[kind]]=state[COLL[kind]].filter(x=>x.id!==item.id)});closeSheet()}}
+  $("#sheetForm").onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(e.target),o={};
+    FIELDS[kind].forEach(([k,,t])=>{let x=fd.get(k);if(t==="number")x=x===""||x==null?"":Number(x);o[k]=typeof x==="string"?x.trim():x});
+    if(kind==="loan"&&!o.total)o.total=(Number(o.monthly)||0)*(Number(o.months)||0);
+    change(()=>{if(sheetItem)Object.assign(sheetItem,o);
+      else{const base=kind==="task"?{done:false}:kind==="loan"?{payments:[]}:{contributions:[]};state[COLL[kind]].unshift(Object.assign({id:uid()},base,o))}});
+    closeSheet();
+  };
+}
+function openHistory(l){
+  const start=parse(l.start)||new Date(now.getFullYear(),now.getMonth()-11,1);
+  const ms=monthsBetween(iso(start),ym(new Date(now.getFullYear(),now.getMonth()+2,1))).slice(-36);
+  openSheet("Payments · "+l.name,`<p class="sub full">Tick each month you've paid. Each tick counts as ${naira(l.monthly)}.</p>`+
+    ms.map(m=>`<label class="full" style="flex-direction:row;align-items:center;gap:10px;font-size:14px;color:var(--ink)"><input type="checkbox" style="width:auto" id="pm-${m}" data-m="${m}" ${(l.payments||[]).includes(m)?"checked":""}> ${ymLabel(m)}</label>`).join("")+
+    `<div class="foot"><span></span><div><button type="button" class="btn" id="histDone">Done</button></div></div>`);
+  $("#sheetForm").querySelectorAll("[data-m]").forEach(c=>c.onchange=()=>change(()=>{const m=c.dataset.m;l.payments=l.payments||[];
+    l.payments=c.checked?[...new Set([...l.payments,m])]:l.payments.filter(x=>x!==m)}));
+  $("#histDone").onclick=closeSheet;
+}
+
+/* settings: change password, backup, restore, erase */
+function openSettings(){
+  openSheet("Settings",`
+   <div class="set-sec" style="border-top:0;padding-top:0"><h3>Change password</h3>
+    <label for="cp0">Current password<input id="cp0" type="password" autocomplete="current-password"></label>
+    <label for="cp1">New password<input id="cp1" type="password" autocomplete="new-password"></label>
+    <div class="meter"><i id="cpMeter"></i></div>
+    <ul class="rules" id="cpRules"><li data-r="len">10+ characters</li><li data-r="up">An uppercase letter</li><li data-r="low">A lowercase letter</li><li data-r="num">A number</li><li data-r="sym">A symbol</li></ul>
+    <label for="cp2">New password again<input id="cp2" type="password" autocomplete="new-password"></label>
+    <p class="err" id="cpErr"></p>
+    <button type="button" class="btn small" id="cpBtn" disabled>Change password</button></div>
+   <div class="set-sec"><h3>Backup</h3>
+    <p>Copy an encrypted backup code and keep it somewhere safe (your email or notes). It can only be opened with your current password.</p>
+    <div class="actions"><button type="button" class="btn ghost small" id="copyBackup">Copy backup code</button></div></div>
+   <div class="set-sec"><h3>Restore</h3><p>Replace everything here with a backup code.</p>
+    <div class="actions"><button type="button" class="btn ghost small" id="goRestore">Restore from backup</button></div></div>
+   <div class="set-sec"><h3>Auto-lock</h3><p>The app locks itself after 60 seconds in the background. Use the lock button at the top to lock right away.</p></div>
+   <div class="foot"><span></span><div><button type="button" class="btn" id="setDone">Done</button></div></div>`);
+  wireStrength($("#cp1"),$("#cp2"),$("#cpRules"),$("#cpMeter"),$("#cpBtn"));
+  $("#setDone").onclick=closeSheet;
+  $("#cpBtn").onclick=async()=>{
+    $("#cpErr").textContent="";
+    try{await openVault(ls.get(VAULT),$("#cp0").value)}catch(e){$("#cpErr").textContent="Current password is wrong.";return}
+    const p=$("#cp1").value;SALT=crypto.getRandomValues(new Uint8Array(16));KEY=await deriveKey(p,SALT);await persistNow();closeSheet();toast("Password changed")};
+  $("#copyBackup").onclick=async()=>{await persistNow();const code=ls.get(VAULT);
+    try{await navigator.clipboard.writeText(code);toast("Backup code copied")}
+    catch(e){openSheet("Backup code",`<p class="sub full">Copying isn't allowed here. Press and hold the code to select and copy it.</p><textarea class="full mono-box" readonly id="bkText" style="min-height:160px">${esc(code)}</textarea><div class="foot"><span></span><div><button type="button" class="btn" id="bkDone">Done</button></div></div>`);
+      $("#bkText").select();$("#bkDone").onclick=closeSheet}};
+  $("#goRestore").onclick=()=>openRestore(false);
+}
+function openRestore(fromLock){
+  openSheet("Restore from backup",`
+   <label class="full" for="rsCode">Backup code<textarea id="rsCode" class="mono-box" style="min-height:120px" placeholder="Paste the backup code here"></textarea></label>
+   <label class="full" for="rsFile">Or choose a saved backup file<input id="rsFile" type="file" accept=".txt,.json,text/plain,application/json"></label>
+   <label class="full" for="rsPw">Password for that backup<input id="rsPw" type="password" autocomplete="off"></label>
+   <p class="err full" id="rsErr"></p>
+   <p class="fine full">This replaces everything currently in the app. Afterwards you'll unlock with the backup's password.</p>
+   <div class="foot"><span></span><div><button type="button" class="btn ghost" id="rsCancel">Cancel</button><button type="button" class="btn" id="rsGo">Restore</button></div></div>`);
+  $("#rsCancel").onclick=closeSheet;
+  $("#rsFile").onchange=async e=>{const f=e.target.files[0];if(f)$("#rsCode").value=(await f.text()).trim()};
+  $("#rsGo").onclick=async()=>{
+    const code=$("#rsCode").value.trim();
+    try{const r=await openVault(code,$("#rsPw").value);ls.set(VAULT,code);ls.del(TRIES);KEY=r.key;SALT=r.salt;state=normalize(r.data);closeSheet();showApp();toast("Backup restored")}
+    catch(e){$("#rsErr").textContent="That code or password didn't work. Check you pasted the whole code."}};
+}
+
+$("#sheetBg").addEventListener("click",e=>{if(e.target.id==="sheetBg")closeSheet()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ui.tab=b.dataset.tab;saveUI();render()});
+$("#clearEx").onclick=()=>change(()=>{state={examples:false,tasks:[],loans:[],savings:[]}});
+$("#lockBtn").onclick=()=>showLock("unlock");
+$("#settingsBtn").onclick=openSettings;
+
+if(!window.crypto||!crypto.subtle){$("#lockSub").textContent="This browser can't encrypt data, so the app can't open here.";}
+else showLock(ls.get(VAULT)?"unlock":"setup");
+})();
+</script>

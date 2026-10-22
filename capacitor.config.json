@@ -1,0 +1,9 @@
+{
+  "appId": "com.scriptedperfect.lifestyleorganiser",
+  "appName": "Lifestyle Organiser",
+  "webDir": "www",
+  "backgroundColor": "#1b0f33",
+  "android": {
+    "backgroundColor": "#1b0f33"
+  }
+}
