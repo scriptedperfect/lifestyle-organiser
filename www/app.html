@@ -28,8 +28,29 @@ h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0}
 .icon-btn svg{width:20px;height:20px}
 .datechip{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--card);border:1px solid var(--rule);padding:4px;border-radius:14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
-.tabs button{border:0;background:transparent;color:var(--muted);font:700 14px var(--body);padding:10px 4px;border-radius:10px;cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;background:var(--card);border:1px solid var(--rule);padding:4px;border-radius:14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tabs button{border:0;background:transparent;color:var(--muted);font:700 12.5px var(--body);padding:10px 2px;border-radius:10px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--ink)}
+.monthnav{display:flex;align-items:center;gap:8px}
+.monthnav b{font-family:var(--display);font-weight:500;font-size:17px;min-width:110px;text-align:center}
+.catbars{display:flex;flex-direction:column;gap:9px;padding:14px}
+.catrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;font-size:13px}
+.catrow .track{grid-column:1/-1;height:7px;background:var(--accent-soft);border-radius:99px;overflow:hidden}
+.catrow .track i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap;margin-left:auto;padding-left:8px}
+.task .amt{align-self:center}
+.addline{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;align-items:end}
+.grid3 label,.addline label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+.linetotal{font-size:12px;color:var(--muted);padding-bottom:6px}
+.linetotal b{font-family:var(--mono);font-size:16px;color:var(--ink);font-weight:500}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+details.bought{background:var(--card);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
+details.bought summary{padding:12px 14px;cursor:pointer;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+details.bought .task{opacity:.7}
+.backbtn{border:0;background:none;color:var(--accent);font:700 14px var(--body);cursor:pointer;padding:4px 0}
+.t3{grid-template-columns:repeat(3,minmax(0,1fr))}.t3 .tile{padding:10px}.t3 .val{font-size:15px}
+.ok-note{padding:14px;text-align:center;color:var(--ok);font-weight:600}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 
 .banner{background:var(--amber-soft);border:1px solid rgba(255,197,110,.35);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -182,8 +203,11 @@ textarea{min-height:70px;resize:vertical}
       <button role="tab" id="tab-todo" aria-selected="true" data-tab="todo">To-dos</button>
       <button role="tab" id="tab-loans" aria-selected="false" data-tab="loans">Loans</button>
       <button role="tab" id="tab-savings" aria-selected="false" data-tab="savings">Savings</button>
+      <button role="tab" id="tab-expenses" aria-selected="false" data-tab="expenses">Expenses</button>
+      <button role="tab" id="tab-market" aria-selected="false" data-tab="market">Market</button>
     </nav>
 
+    <div class="preview-note" id="previewNote" hidden>Preview: the password screen is skipped and nothing you change here is saved. The installed app opens with your password.</div>
     <div class="banner" id="exBanner" hidden>
       <span>These are example entries to show how it works. Clear them to start your own.</span>
       <button class="btn small" id="clearEx">Clear examples</button>
@@ -192,6 +216,8 @@ textarea{min-height:70px;resize:vertical}
     <section id="view-todo"></section>
     <section id="view-loans" hidden></section>
     <section id="view-savings" hidden></section>
+    <section id="view-expenses" hidden></section>
+    <section id="view-market" hidden></section>
     <p class="status" id="saveStatus"></p>
   </div>
 </div>
@@ -312,9 +338,34 @@ function examples(){
   {id:uid(),name:"Equipment loan",lender:"Example Microfinance",principal:800000,rate:15,monthly:72000,dueDay:5,start:"2026-03-01",months:12,total:864000,payments:monthsBetween("2026-03-01",thisYM),notes:""}],
  savings:[
   {id:uid(),name:"Emergency fund",kind:"Savings",where:"Savings app",balance:450000,monthly:50000,rate:12,dueDay:28,maturity:"",contributions:[lastMonth],notes:""},
-  {id:uid(),name:"Treasury bills",kind:"Investment",where:"Example Bank",balance:1000000,monthly:0,rate:18,dueDay:0,maturity:"2027-01-15",contributions:[],notes:""}]
+  {id:uid(),name:"Treasury bills",kind:"Investment",where:"Example Bank",balance:1000000,monthly:0,rate:18,dueDay:0,maturity:"2027-01-15",contributions:[],notes:""}],
+ ...exampleExtras(plus)
 }}
-function normalize(d){const s=JSON.parse(JSON.stringify(d||{}));s.tasks=s.tasks||[];s.loans=s.loans||[];s.savings=s.savings||[];s.examples=!!s.examples;return s}
+function exampleExtras(plus){
+  const prevM=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const pd=n=>iso(new Date(prevM.getFullYear(),prevM.getMonth(),n));
+  const td_=n=>{const d=new Date(now.getFullYear(),now.getMonth(),Math.min(n,now.getDate()));return iso(d)};
+  const ex=(date,category,note,amount,method,space)=>({id:uid(),date,category,note,amount,method:method||"Transfer",space:space||"Personal"});
+  const cat=[["Rice","50kg bag",78000,"Grains & staples"],["Beans","paint bucket",9500,"Grains & staples"],["Garri","paint bucket",6000,"Grains & staples"],["Vegetable oil","5 litres",14500,"Cooking"],["Tomatoes","small basket",12000,"Fresh produce"],["Pepper (tatashe & rodo)","bowl",4000,"Fresh produce"],["Onions","bag (small)",8500,"Fresh produce"],["Eggs","crate",5800,"Protein"],["Frozen chicken","carton (10kg)",42000,"Protein"],["Indomie noodles","carton",11500,"Grains & staples"],["Milk (powdered)","tin",6500,"Drinks & breakfast"],["Bread","loaf",1800,"Drinks & breakfast"],["Detergent","1kg pack",3200,"Household"],["Toilet roll","pack of 12",6800,"Household"],["Toothpaste","tube",1500,"Toiletries"]]
+    .map(([name,unit,price,category])=>({id:uid(),name,unit,price,category}));
+  const by=n=>cat.find(c=>c.name===n);
+  const line=(n,qty,bought)=>{const c=by(n);return{id:uid(),itemId:c.id,name:c.name,unit:c.unit,qty,price:c.price,bought}};
+  return{
+    budget:450000,
+    expenses:[
+      ex(td_(1),"Rent & housing","Service charge",35000),ex(td_(2),"Data & airtime","Monthly data plan",15000,"Card"),
+      ex(td_(4),"Food & groceries","Weekend market",46500,"Cash"),ex(td_(6),"Transport","Fuel",28000,"POS"),
+      ex(td_(9),"Business","Video generation credits",24000,"Card","Work"),ex(td_(12),"Bills & utilities","Electricity token",20000),
+      ex(td_(15),"Family & gifts","Birthday gift",15000),ex(td_(18),"Transport","Ride to client meeting",9500,"Transfer","Work"),
+      ex(td_(20),"Food & groceries","Supermarket top-up",18200,"Card"),
+      ex(pd(3),"Food & groceries","Monthly market",96000,"Cash"),ex(pd(5),"Transport","Fuel",30000,"POS"),ex(pd(10),"Bills & utilities","Electricity token",20000),
+      ex(pd(14),"Business","Editing app subscription",12000,"Card","Work"),ex(pd(22),"Health","Pharmacy",8500)],
+    catalog:cat,
+    lists:[{id:uid(),name:"Saturday market run",date:plus(2),recorded:false,
+      items:[line("Rice",1,false),line("Tomatoes",1,true),line("Pepper (tatashe & rodo)",2,true),line("Vegetable oil",1,false),line("Eggs",2,false),line("Onions",1,false),line("Detergent",2,false)]}]
+  };
+}
+function normalize(d){const s=JSON.parse(JSON.stringify(d||{}));["tasks","loans","savings","expenses","catalog","lists"].forEach(k=>s[k]=s[k]||[]);s.budget=Number(s.budget)||0;s.examples=!!s.examples;return s}
 
 let state=null;
 let ui={tab:"todo",space:"All",filter:"Today"};
@@ -323,7 +374,8 @@ const saveUI=()=>ls.set("lo-ui",JSON.stringify(ui));
 
 let saveTimer=null,chain=Promise.resolve();
 const status=t=>{$("#saveStatus").textContent=t};
-async function persistNow(){if(!KEY||!state)return;const s=await sealVault(state);if(!ls.set(VAULT,s))status("Couldn't save. Phone storage may be full.");else status("Saved and encrypted on this phone")}
+const PREVIEW=!!window.LO_PREVIEW;
+async function persistNow(){if(PREVIEW){status("Preview: changes aren't saved");return}if(!KEY||!state)return;const s=await sealVault(state);if(!ls.set(VAULT,s))status("Couldn't save. Phone storage may be full.");else status("Saved and encrypted on this phone")}
 function persist(){clearTimeout(saveTimer);status("Saving…");saveTimer=setTimeout(()=>{chain=chain.then(persistNow).catch(()=>status("Couldn't save"))},400)}
 function change(fn){fn();render();persist()}
 
@@ -362,8 +414,168 @@ function render(){
   $("#today").textContent=now.toLocaleDateString("en-NG",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
   $("#exBanner").hidden=!state.examples;
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===ui.tab));
-  ["todo","loans","savings"].forEach(t=>$("#view-"+t).hidden=ui.tab!==t);
-  if(ui.tab==="todo")renderTodo();if(ui.tab==="loans")renderLoans();if(ui.tab==="savings")renderSavings();
+  if(!["todo","loans","savings","expenses","market"].includes(ui.tab))ui.tab="todo";
+  ["todo","loans","savings","expenses","market"].forEach(t=>$("#view-"+t).hidden=ui.tab!==t);
+  ({todo:renderTodo,loans:renderLoans,savings:renderSavings,expenses:renderExpenses,market:renderMarket})[ui.tab]();
+}
+
+/* ================= expenses ================= */
+const EXP_CATS=["Food & groceries","Transport","Rent & housing","Bills & utilities","Data & airtime","Business","Family & gifts","Health","Personal care","Entertainment","Loan repayment","Savings","Other"];
+const shiftYM=(s,n)=>{const [y,m]=s.split("-").map(Number);return ym(new Date(y,m-1+n,1))};
+const ymLong=s=>{const [y,m]=s.split("-");return["January","February","March","April","May","June","July","August","September","October","November","December"][+m-1]+" "+y};
+function renderExpenses(){
+  const M=ui.expMonth||thisYM;
+  const of=k=>state.expenses.filter(e=>(e.date||"").slice(0,7)===k);
+  const items=of(M).sort((a,b)=>b.date.localeCompare(a.date));
+  const sum=a=>a.reduce((t,e)=>t+Number(e.amount||0),0);
+  const total=sum(items),prev=sum(of(shiftYM(M,-1)));
+  const byCat={};items.forEach(e=>byCat[e.category]=(byCat[e.category]||0)+Number(e.amount||0));
+  const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const top=cats[0];
+  const left=state.budget?state.budget-total:null;
+  const work=sum(items.filter(e=>e.space==="Work"));
+  const diff=total-prev;
+  const groups={};items.forEach(e=>(groups[e.date]=groups[e.date]||[]).push(e));
+  $("#view-expenses").innerHTML=`
+  <div class="cards">
+   <div class="bar"><div class="monthnav"><button class="icon-btn" id="mPrev" aria-label="Previous month">‹</button><b>${ymLong(M)}</b><button class="icon-btn" id="mNext" aria-label="Next month">›</button></div>
+    <button class="btn small" id="addExp" style="margin-left:auto">+ Add expense</button></div>
+   <div class="tiles">
+    <div class="tile"><div class="lab">Spent this month</div><div class="val">${naira(total)}</div><div class="note">${items.length} expense${items.length===1?"":"s"} · work ${naira(work)}</div></div>
+    <div class="tile"><div class="lab">Budget left</div><div class="val" style="color:${left===null?"inherit":left<0?"var(--red)":"var(--ok)"}">${left===null?"–":naira(left)}</div><div class="note">${state.budget?"of "+naira(state.budget)+" · ":""}<button class="linkbtn" id="setBudget" style="padding:0;font-size:12px">${state.budget?"Change":"Set a monthly budget"}</button></div></div>
+    <div class="tile"><div class="lab">vs ${MON[(+M.slice(5)+10)%12]}</div><div class="val" style="color:${diff>0?"var(--amber)":"var(--ok)"}">${prev?(diff>0?"+":"−")+naira(Math.abs(diff)).slice(0):"–"}</div><div class="note">${prev?"last month "+naira(prev):"no spending recorded"}</div></div>
+    <div class="tile"><div class="lab">Biggest category</div><div class="val" style="font-size:15px">${top?esc(top[0]):"–"}</div><div class="note">${top?naira(top[1])+" · "+Math.round(top[1]/total*100)+"%":""}</div></div>
+   </div>
+   ${state.budget?`<div class="prog" aria-label="Budget used"><i style="width:${Math.min(100,total/state.budget*100).toFixed(1)}%;background:${total>state.budget?"var(--red)":"var(--accent)"}"></i></div>`:""}
+   ${cats.length?`<div class="list"><div class="group-h">Where the money went</div><div class="catbars">${cats.map(([c,v])=>`<div class="catrow"><span>${esc(c)}</span><span class="amt">${naira(v)}</span><div class="track"><i style="width:${(v/top[1]*100).toFixed(1)}%"></i></div></div>`).join("")}</div></div>`:""}
+   <div class="list">${items.length?Object.entries(groups).map(([d,es])=>{const dt=parse(d);return`<div class="group-h">${dt.toLocaleDateString("en-NG",{weekday:"short",day:"numeric",month:"short"})}</div>`+es.map(e=>`
+     <div class="task"><div class="body" data-exp="${e.id}" tabindex="0"><div class="t">${esc(e.note||e.category)}</div><div class="meta"><span class="pill">${esc(e.category)}</span><span>${esc(e.method||"")}</span>${e.space==="Work"?`<span class="pill low">Work</span>`:""}</div></div><span class="amt">${naira(e.amount)}</span></div>`).join("")}).join(""):
+     `<div class="empty">No expenses in ${ymLong(M)}. Tap “Add expense” to record one.</div>`}</div>
+  </div>`;
+  $("#mPrev").onclick=()=>{ui.expMonth=shiftYM(M,-1);saveUI();render()};
+  $("#mNext").onclick=()=>{ui.expMonth=shiftYM(M,1);saveUI();render()};
+  $("#addExp").onclick=()=>openForm("expense");
+  $("#setBudget").onclick=()=>{openSheet("Monthly budget",`<label class="full" for="bgAmt">Budget for each month (₦)<input id="bgAmt" type="number" inputmode="decimal" min="0" step="any" value="${state.budget||""}"></label><p class="fine full">Leave blank to turn the budget off.</p><div class="foot"><span></span><div><button type="button" class="btn ghost" id="bgCancel">Cancel</button><button type="submit" class="btn">Save</button></div></div>`);
+    $("#bgCancel").onclick=closeSheet;$("#sheetForm").onsubmit=e=>{e.preventDefault();change(()=>state.budget=Number($("#bgAmt").value)||0);closeSheet()}};
+  document.querySelectorAll("[data-exp]").forEach(b=>{const go=()=>openForm("expense",state.expenses.find(x=>x.id===b.dataset.exp));b.onclick=go;b.onkeydown=e=>{if(e.key==="Enter")go()}});
+}
+
+/* ================= market list & shopping lists ================= */
+const MKT_CATS=["Grains & staples","Fresh produce","Protein","Cooking","Drinks & breakfast","Household","Toiletries","Baby","Other"];
+const lineTotal=l=>Number(l.qty||0)*Number(l.price||0);
+function listTotals(L){const all=L.items.reduce((t,l)=>t+lineTotal(l),0),bought=L.items.filter(l=>l.bought).reduce((t,l)=>t+lineTotal(l),0);
+  return{all,bought,left:all-bought,nLeft:L.items.filter(l=>!l.bought).length,n:L.items.length}}
+function renderMarket(){
+  const mv=ui.mview||"lists";
+  const L=ui.openList&&state.lists.find(x=>x.id===ui.openList);
+  if(L&&mv==="lists"){renderListDetail(L);return}
+  const seg=`<div class="seg">${[["lists","Shopping lists"],["items","Market list"]].map(([k,t])=>`<button data-mview="${k}" aria-pressed="${mv===k}">${t}</button>`).join("")}</div>`;
+  if(mv==="items"){
+    const groups={};state.catalog.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>(groups[c.category||"Other"]=groups[c.category||"Other"]||[]).push(c));
+    $("#view-market").innerHTML=`<div class="cards">
+     <div class="bar">${seg}<button class="btn small" id="addMItem" style="margin-left:auto">+ Add item</button></div>
+     <p class="sub">Everything you usually buy, with its unit and usual price. Pick from these when you make a shopping list.</p>
+     <div class="list">${state.catalog.length?MKT_CATS.filter(c=>groups[c]).map(c=>`<div class="group-h">${esc(c)}</div>`+groups[c].map(i=>`
+       <div class="task"><div class="body" data-mitem="${i.id}" tabindex="0"><div class="t">${esc(i.name)}</div><div class="meta"><span>per ${esc(i.unit||"item")}</span></div></div><span class="amt">${naira(i.price)}</span></div>`).join("")).join(""):
+       `<div class="empty">Your market list is empty. Add the items you usually buy.</div>`}</div></div>`;
+    $("#addMItem").onclick=()=>openForm("mitem");
+    document.querySelectorAll("[data-mitem]").forEach(b=>{const go=()=>openForm("mitem",state.catalog.find(x=>x.id===b.dataset.mitem));b.onclick=go;b.onkeydown=e=>{if(e.key==="Enter")go()}});
+  }else{
+    const lists=state.lists.slice().sort((a,b)=>(listTotals(a).nLeft===0)-(listTotals(b).nLeft===0)||(a.date||"").localeCompare(b.date||""));
+    $("#view-market").innerHTML=`<div class="cards">
+     <div class="bar">${seg}<button class="btn small" id="newList" style="margin-left:auto">+ New shopping list</button></div>
+     ${lists.length?lists.map(L=>{const t=listTotals(L),d=parse(L.date);return`
+      <article class="card">
+       <div class="top"><div><div class="name">${esc(L.name)}</div><div class="who">${d?d.toLocaleDateString("en-NG",{weekday:"short",day:"numeric",month:"short"}):"No date"} · ${t.n} item${t.n===1?"":"s"}</div></div>
+        <span class="pill ${t.n&&!t.nLeft?"paid":""}">${t.n&&!t.nLeft?"All bought":t.nLeft+" left to buy"}</span></div>
+       <div class="kv"><div><div class="k">Estimated total</div><div class="v">${naira(t.all)}</div></div><div><div class="k">Bought</div><div class="v">${naira(t.bought)}</div></div><div><div class="k">Left to buy</div><div class="v">${naira(t.left)}</div></div></div>
+       <div class="prog"><i style="width:${t.n?((t.n-t.nLeft)/t.n*100).toFixed(1):0}%"></i></div>
+       <div class="actions"><button class="btn small" data-open="${L.id}">Open list</button></div>
+      </article>`}).join(""):`<div class="list"><div class="empty">No shopping lists yet. Tap “New shopping list” before you go to the market.</div></div>`}
+    </div>`;
+    $("#newList").onclick=newListSheet;
+    document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{ui.openList=b.dataset.open;saveUI();render();window.scrollTo(0,0)});
+  }
+  document.querySelectorAll("[data-mview]").forEach(b=>b.onclick=()=>{ui.mview=b.dataset.mview;saveUI();render()});
+}
+function newListSheet(copyFrom){
+  const def="Market run · "+now.getDate()+" "+MON[now.getMonth()];
+  openSheet(copyFrom?"Copy as a new list":"New shopping list",`<label class="full" for="nlName">List name<input id="nlName" value="${esc(copyFrom?copyFrom.name:def)}" required></label>
+   <label class="full" for="nlDate">Shopping date<input id="nlDate" type="date" value="${iso(now)}"></label>
+   <div class="foot"><span></span><div><button type="button" class="btn ghost" id="nlCancel">Cancel</button><button type="submit" class="btn">Create list</button></div></div>`);
+  $("#nlCancel").onclick=closeSheet;
+  $("#sheetForm").onsubmit=e=>{e.preventDefault();const L={id:uid(),name:$("#nlName").value.trim()||def,date:$("#nlDate").value,recorded:false,
+    items:copyFrom?copyFrom.items.map(l=>Object.assign({},l,{id:uid(),bought:false})):[]};
+    change(()=>{state.lists.unshift(L);ui.mview="lists";ui.openList=L.id;saveUI()});closeSheet();window.scrollTo(0,0)};
+}
+function renderListDetail(L){
+  const t=listTotals(L);
+  const toBuy=L.items.filter(l=>!l.bought),got=L.items.filter(l=>l.bought);
+  const groups={};state.catalog.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>(groups[c.category||"Other"]=groups[c.category||"Other"]||[]).push(c));
+  const row=l=>`<div class="task"><button class="check" role="checkbox" aria-checked="${!!l.bought}" aria-label="Mark ${esc(l.name)} bought" data-buy="${l.id}">${l.bought?"✓":""}</button>
+    <div class="body" data-line="${l.id}" tabindex="0"><div class="t">${esc(l.name)}</div><div class="meta"><span>${l.qty} × ${naira(l.price)}${l.unit?" / "+esc(l.unit):""}</span></div></div><span class="amt">${naira(lineTotal(l))}</span></div>`;
+  const d=parse(L.date);
+  $("#view-market").innerHTML=`<div class="cards">
+   <button class="backbtn" id="backLists">‹ All shopping lists</button>
+   <div><h2>${esc(L.name)}</h2><p class="sub">${d?d.toLocaleDateString("en-NG",{weekday:"long",day:"numeric",month:"long"}):"No date"}</p></div>
+   <div class="tiles t3">
+    <div class="tile"><div class="lab">Estimated total</div><div class="val">${naira(t.all)}</div><div class="note">${t.n} item${t.n===1?"":"s"}</div></div>
+    <div class="tile"><div class="lab">Left to buy</div><div class="val" style="color:${t.left?"var(--amber)":"var(--ok)"}">${naira(t.left)}</div><div class="note">${t.nLeft} item${t.nLeft===1?"":"s"}</div></div>
+    <div class="tile"><div class="lab">Bought</div><div class="val">${naira(t.bought)}</div><div class="note">${t.n-t.nLeft} item${t.n-t.nLeft===1?"":"s"}</div></div>
+   </div>
+   <form class="addline" id="addLine">
+    <label for="lnItem">Add an item
+     <select id="lnItem" required><option value="">Choose from your market list…</option>
+      ${MKT_CATS.filter(c=>groups[c]).map(c=>`<optgroup label="${esc(c)}">${groups[c].map(i=>`<option value="${i.id}">${esc(i.name)} (${esc(i.unit||"item")})</option>`).join("")}</optgroup>`).join("")}
+      <option value="__new">＋ Something new (adds it to your market list)</option></select></label>
+    <div class="grid2" id="newItemBox" hidden><label for="lnName">Item name<input id="lnName"></label><label for="lnUnit">Unit<input id="lnUnit" placeholder="kg, pack, bag…"></label></div>
+    <div class="grid3"><label for="lnQty">Quantity<input id="lnQty" type="number" inputmode="decimal" min="0" step="any" value="1"></label>
+     <label for="lnPrice">Est. price each (₦)<input id="lnPrice" type="number" inputmode="decimal" min="0" step="any"></label>
+     <div class="linetotal">Line total<br><b id="lnTotal">₦0</b></div></div>
+    <button class="btn" type="submit">Add to list</button>
+   </form>
+   <div class="list">${toBuy.length?`<div class="group-h">To buy · tick when bought</div>`+toBuy.map(row).join(""):t.n?`<div class="ok-note">Everything on this list is bought.</div>`:`<div class="empty">This list is empty. Add items above.</div>`}</div>
+   ${got.length?`<details class="bought"><summary><span>Bought (${got.length})</span><span class="amt">${naira(t.bought)}</span></summary>${got.map(row).join("")}</details>`:""}
+   <div class="actions">
+    ${got.length?(L.recorded?`<span class="pill paid">Recorded in expenses</span>`:`<button class="btn small" id="recordExp">Record ${naira(t.bought)} bought as an expense</button>`):""}
+    <button class="btn ghost small" id="copyList">Copy as new list</button>
+    <button class="btn danger small" id="delList">Delete list</button>
+   </div>
+  </div>`;
+  $("#backLists").onclick=()=>{ui.openList=null;saveUI();render()};
+  const sel=$("#lnItem"),qty=$("#lnQty"),pr=$("#lnPrice");
+  const upd=()=>{$("#lnTotal").textContent=naira((Number(qty.value)||0)*(Number(pr.value)||0))};
+  sel.onchange=()=>{const isNew=sel.value==="__new";$("#newItemBox").hidden=!isNew;$("#lnName").required=isNew;
+    const c=state.catalog.find(x=>x.id===sel.value);if(c){pr.value=c.price||"";}if(isNew){pr.value="";setTimeout(()=>$("#lnName").focus(),0)}upd()};
+  qty.oninput=upd;pr.oninput=upd;
+  $("#addLine").onsubmit=e=>{e.preventDefault();
+    let c=state.catalog.find(x=>x.id===sel.value);
+    change(()=>{
+      if(sel.value==="__new"){const name=$("#lnName").value.trim();if(!name)return;c={id:uid(),name,unit:$("#lnUnit").value.trim(),price:Number(pr.value)||0,category:"Other"};state.catalog.push(c)}
+      if(!c)return;
+      const ex=L.items.find(l=>l.itemId===c.id&&!l.bought);
+      if(ex){ex.qty=Number(ex.qty||0)+(Number(qty.value)||1);ex.price=Number(pr.value)||ex.price;toast(c.name+" quantity updated")}
+      else L.items.push({id:uid(),itemId:c.id,name:c.name,unit:c.unit,qty:Number(qty.value)||1,price:Number(pr.value)||0,bought:false});
+    });
+    const s=$("#lnItem");s&&s.focus();
+  };
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>change(()=>{const l=L.items.find(x=>x.id===b.dataset.buy);l.bought=!l.bought;if(l.bought)L.recorded=false}));
+  document.querySelectorAll("[data-line]").forEach(b=>{const go=()=>editLine(L,L.items.find(x=>x.id===b.dataset.line));b.onclick=go;b.onkeydown=e=>{if(e.key==="Enter")go()}});
+  const rec=$("#recordExp");if(rec)rec.onclick=()=>change(()=>{state.expenses.push({id:uid(),date:iso(now),category:"Food & groceries",note:"Shopping: "+L.name,amount:t.bought,method:"Cash",space:"Personal"});L.recorded=true;toast("Added to this month's expenses")});
+  $("#copyList").onclick=()=>newListSheet(L);
+  const del=$("#delList");let armed=false,tm;del.onclick=()=>{if(!armed){armed=true;del.textContent="Tap again to delete";tm=setTimeout(()=>{armed=false;del.textContent="Delete list"},3000);return}
+    clearTimeout(tm);change(()=>{state.lists=state.lists.filter(x=>x.id!==L.id);ui.openList=null;saveUI()})};
+}
+function editLine(L,l){
+  openSheet(l.name,`<label for="elQty">Quantity${l.unit?" ("+esc(l.unit)+")":""}<input id="elQty" type="number" inputmode="decimal" min="0" step="any" value="${l.qty}"></label>
+   <label for="elPrice">Price each (₦)<input id="elPrice" type="number" inputmode="decimal" min="0" step="any" value="${l.price}"></label>
+   <p class="fine full">Change the price to what you actually paid, if it was different.</p>
+   <label class="full" style="flex-direction:row;align-items:center;gap:10px;font-size:14px;color:var(--ink)" for="elUpd"><input type="checkbox" id="elUpd" style="width:auto"> Also update the usual price in my market list</label>
+   <div class="foot"><button type="button" class="btn danger small" id="elDel">Remove</button><div><button type="button" class="btn ghost" id="elCancel">Cancel</button><button type="submit" class="btn">Save</button></div></div>`);
+  $("#elCancel").onclick=closeSheet;
+  $("#elDel").onclick=()=>{change(()=>L.items=L.items.filter(x=>x.id!==l.id));closeSheet()};
+  $("#sheetForm").onsubmit=e=>{e.preventDefault();change(()=>{l.qty=Number($("#elQty").value)||0;l.price=Number($("#elPrice").value)||0;
+    if($("#elUpd").checked){const c=state.catalog.find(x=>x.id===l.itemId);if(c)c.price=l.price}});closeSheet()};
 }
 function taskMatches(t){
   if(ui.space!=="All"&&t.space!==ui.space)return false;
@@ -495,16 +707,20 @@ function renderSavings(){
 const FIELDS={
  task:[["title","To-do","text",1],["space","Space","select",0,["Work","Personal"]],["project","Project","text",0,null,"projList"],["priority","Priority","select",0,["High","Medium","Low"]],["due","Due date","date"],["notes","Notes","textarea",1]],
  loan:[["name","Loan name","text",1],["lender","Lender","text"],["principal","Amount borrowed (₦)","number"],["rate","Interest rate (% a year)","number"],["monthly","Monthly repayment (₦)","number"],["dueDay","Due day of month (1–31)","number"],["start","Start date","date"],["months","Tenor (months)","number"],["total","Total to repay (₦)","number",1],["notes","Notes","textarea",1]],
- saving:[["name","Name","text",1],["kind","Type","select",0,["Savings","Investment"]],["where","Where (bank, app)","text"],["balance","Current balance (₦)","number"],["monthly","Monthly contribution (₦)","number"],["rate","Interest / return (% a year)","number"],["dueDay","Contribution day (1–31)","number"],["maturity","Maturity date","date"],["notes","Notes","textarea",1]]
+ saving:[["name","Name","text",1],["kind","Type","select",0,["Savings","Investment"]],["where","Where (bank, app)","text"],["balance","Current balance (₦)","number"],["monthly","Monthly contribution (₦)","number"],["rate","Interest / return (% a year)","number"],["dueDay","Contribution day (1–31)","number"],["maturity","Maturity date","date"],["notes","Notes","textarea",1]],
+ expense:[["amount","Amount (₦)","number"],["date","Date","date"],["category","Category","select",0,EXP_CATS],["method","Paid by","select",0,["Cash","Transfer","Card","POS"]],["note","What was it for?","text",1],["space","Personal or work","select",1,["Personal","Work"]]],
+ mitem:[["name","Item name","text",1],["unit","Unit (kg, bag, pack…)","text"],["price","Usual price (₦)","number"],["category","Category","select",1,MKT_CATS]]
 };
-const TITLES={task:"to-do",loan:"loan",saving:"savings or investment"};
-const COLL={task:"tasks",loan:"loans",saving:"savings"};
+const TITLES={task:"to-do",loan:"loan",saving:"savings or investment",expense:"expense",mitem:"market item"};
+const COLL={task:"tasks",loan:"loans",saving:"savings",expense:"expenses",mitem:"catalog"};
 let sheetKind=null,sheetItem=null;
 function openSheet(title,html){$("#sheetTitle").textContent=title;$("#sheetForm").innerHTML=html;$("#sheetBg").hidden=false}
 function closeSheet(){$("#sheetBg").hidden=true;$("#sheetForm").innerHTML="";$("#sheetForm").onsubmit=null}
 function openForm(kind,item){
   sheetKind=kind;sheetItem=item||null;
-  const v=item||(kind==="task"?{space:ui.space==="All"?"Work":ui.space,priority:"Medium"}:kind==="saving"?{kind:"Savings"}:{});
+  const M=ui.expMonth||thisYM;
+  const v=item||(kind==="task"?{space:ui.space==="All"?"Work":ui.space,priority:"Medium"}:kind==="saving"?{kind:"Savings"}:
+    kind==="expense"?{date:M===thisYM?iso(now):M+"-01",category:"Food & groceries",method:"Transfer",space:"Personal"}:kind==="mitem"?{category:"Grains & staples"}:{});
   openSheet((item?"Edit ":"New ")+TITLES[kind],FIELDS[kind].map(([k,l,t,full,opts,list])=>{
     const val=esc(v[k]??""),id="f-"+kind+"-"+k;
     const ctl=t==="select"?`<select id="${id}" name="${k}">${opts.map(o=>`<option ${v[k]===o?"selected":""}>${o}</option>`).join("")}</select>`:
@@ -521,7 +737,7 @@ function openForm(kind,item){
     FIELDS[kind].forEach(([k,,t])=>{let x=fd.get(k);if(t==="number")x=x===""||x==null?"":Number(x);o[k]=typeof x==="string"?x.trim():x});
     if(kind==="loan"&&!o.total)o.total=(Number(o.monthly)||0)*(Number(o.months)||0);
     change(()=>{if(sheetItem)Object.assign(sheetItem,o);
-      else{const base=kind==="task"?{done:false}:kind==="loan"?{payments:[]}:{contributions:[]};state[COLL[kind]].unshift(Object.assign({id:uid()},base,o))}});
+      else{const base=kind==="task"?{done:false}:kind==="loan"?{payments:[]}:kind==="saving"?{contributions:[]}:{};state[COLL[kind]].unshift(Object.assign({id:uid()},base,o))}});
     closeSheet();
   };
 }
@@ -560,7 +776,7 @@ function openSettings(){
     $("#cpErr").textContent="";
     try{await openVault(ls.get(VAULT),$("#cp0").value)}catch(e){$("#cpErr").textContent="Current password is wrong.";return}
     const p=$("#cp1").value;SALT=crypto.getRandomValues(new Uint8Array(16));KEY=await deriveKey(p,SALT);await persistNow();closeSheet();toast("Password changed")};
-  $("#copyBackup").onclick=async()=>{await persistNow();const code=ls.get(VAULT);
+  $("#copyBackup").onclick=async()=>{if(PREVIEW){toast("Backups work in the installed app");return}await persistNow();const code=ls.get(VAULT);
     try{await navigator.clipboard.writeText(code);toast("Backup code copied")}
     catch(e){openSheet("Backup code",`<p class="sub full">Copying isn't allowed here. Press and hold the code to select and copy it.</p><textarea class="full mono-box" readonly id="bkText" style="min-height:160px">${esc(code)}</textarea><div class="foot"><span></span><div><button type="button" class="btn" id="bkDone">Done</button></div></div>`);
       $("#bkText").select();$("#bkDone").onclick=closeSheet}};
@@ -585,11 +801,12 @@ function openRestore(fromLock){
 $("#sheetBg").addEventListener("click",e=>{if(e.target.id==="sheetBg")closeSheet()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ui.tab=b.dataset.tab;saveUI();render()});
-$("#clearEx").onclick=()=>change(()=>{state={examples:false,tasks:[],loans:[],savings:[]}});
+$("#clearEx").onclick=()=>change(()=>{state=normalize({examples:false});ui.openList=null});
 $("#lockBtn").onclick=()=>showLock("unlock");
 $("#settingsBtn").onclick=openSettings;
 
-if(!window.crypto||!crypto.subtle){$("#lockSub").textContent="This browser can't encrypt data, so the app can't open here.";}
+if(PREVIEW){state=normalize(examples());$("#previewNote").hidden=false;$("#lockBtn").onclick=()=>toast("The lock works in the installed app");showApp();status("Preview: changes aren't saved")}
+else if(!window.crypto||!crypto.subtle){$("#lockSub").textContent="This browser can't encrypt data, so the app can't open here.";}
 else showLock(ls.get(VAULT)?"unlock":"setup");
 })();
 </script>
