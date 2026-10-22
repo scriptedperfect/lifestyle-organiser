@@ -13,9 +13,15 @@ mkdir -p "$RES/values"
 cat > "$RES/values/colors.xml" <<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#1b0f33</color>
-    <color name="colorPrimaryDark">#1b0f33</color>
-    <color name="colorAccent">#b993ff</color>
+    <color name="colorPrimary">#fbf6ec</color>
+    <color name="colorPrimaryDark">#6a3fd0</color>
+    <color name="colorAccent">#6a3fd0</color>
 </resources>
 XML
-echo "Icons and colours applied"
+# Microphone permission for voice commands
+MANIFEST=android/app/src/main/AndroidManifest.xml
+if ! grep -q RECORD_AUDIO "$MANIFEST"; then
+  sed -i 's#</manifest>#    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <queries>\n        <intent>\n            <action android:name="android.speech.RecognitionService" />\n        </intent>\n    </queries>\n</manifest>#' "$MANIFEST"
+fi
+grep -n "RECORD_AUDIO\|RecognitionService" "$MANIFEST"
+echo "Icons, colours and permissions applied"

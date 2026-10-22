@@ -1,18 +1,21 @@
 <title>Lifestyle Organiser</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="theme-color" content="#1b0f33">
+<meta name="theme-color" content="#fbf6ec">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one-column phone app on deep purple; lock screen, three tabs, bottom sheets for forms and settings */
+/* Layout: one-column phone app on cream with a switchable accent; lock screen, three tabs, bottom sheets for forms and settings */
 :root{
-  --bg:#1b0f33; --bg-hi:#2d1760; --card:#2a1a55; --card-2:#342266; --ink:#f4effe; --muted:#b9abdd; --rule:#40306f;
-  --accent:#b993ff; --accent-ink:#1b0f33; --accent-soft:rgba(185,147,255,.16);
-  --amber:#ffc56e; --amber-soft:rgba(255,197,110,.15); --red:#ff8f8f; --red-soft:rgba(255,143,143,.15); --ok:#86e3ae; --ok-soft:rgba(134,227,174,.15);
+  --bg:#fbf6ec; --bg-hi:#f3e9d6; --card:#fffdf8; --card-2:#f6efe2; --ink:#231a30; --muted:#6c6178; --rule:#e7dccb;
+  --accent:#6a3fd0; --accent-ink:#ffffff; --accent-soft:rgba(106,63,208,.11); --accent-text:#5a32b8;
+  --amber:#9a5a00; --amber-soft:rgba(214,140,20,.14); --red:#b8322a; --red-soft:rgba(200,55,45,.11); --ok:#1d7446; --ok-soft:rgba(40,150,90,.13);
   --display:"Sora",ui-sans-serif,system-ui,sans-serif;
   --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
-  color-scheme:dark;
+  color-scheme:light;
 }
+:root[data-accent="gray"]{--accent:#4a5361; --accent-soft:rgba(74,83,97,.12); --accent-text:#3d4552}
+:root[data-accent="blue"]{--accent:#1f5fd6; --accent-soft:rgba(31,95,214,.11); --accent-text:#1a50b8}
+:root[data-accent="orange"]{--accent:#c2560c; --accent-soft:rgba(214,100,20,.13); --accent-text:#a3460a}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{min-height:100%}
@@ -20,7 +23,7 @@ body{background:var(--bg) radial-gradient(120% 60% at 50% -10%,var(--bg-hi),var(
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 80px;margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0;text-wrap:balance}
 h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0}
 .sub{color:var(--muted);font-size:13px;margin:2px 0 0}
 .top-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -48,12 +51,23 @@ h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0}
 details.bought{background:var(--card);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
 details.bought summary{padding:12px 14px;cursor:pointer;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
 details.bought .task{opacity:.7}
-.backbtn{border:0;background:none;color:var(--accent);font:700 14px var(--body);cursor:pointer;padding:4px 0}
-.t3{grid-template-columns:repeat(3,minmax(0,1fr))}.t3 .tile{padding:10px}.t3 .val{font-size:15px}
+.backbtn{border:0;background:none;color:var(--accent-text);font:700 14px var(--body);cursor:pointer;padding:4px 0}
+.tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}.t3 .tile{padding:10px}.t3 .val{font-size:15px}
+.swatches{display:flex;gap:12px;flex-wrap:wrap}
+.sw{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;cursor:pointer;font:600 12px var(--body);color:var(--ink);padding:0}
+.sw i{display:block;width:44px;height:44px;border-radius:14px;border:3px solid var(--card)}
+.sw[aria-pressed="true"] i{box-shadow:0 0 0 2px var(--ink)}
+.mic-big{width:76px;height:76px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;margin:4px auto}
+.mic-big svg{width:32px;height:32px}
+.mic-big.on{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 14px var(--accent-soft)}}
+@media (prefers-reduced-motion:reduce){.mic-big.on{animation:none;outline:3px solid var(--accent-soft)}}
+.voice-eg{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.voice-eg button{border:1px dashed var(--rule);background:var(--card-2);color:var(--ink);font:13px var(--body);padding:8px 10px;border-radius:10px;text-align:left;cursor:pointer}
 .ok-note{padding:14px;text-align:center;color:var(--ok);font-weight:600}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 
-.banner{background:var(--amber-soft);border:1px solid rgba(255,197,110,.35);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner{background:var(--amber-soft);border:1px solid rgba(214,140,20,.35);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .tile{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:12px}
@@ -66,10 +80,10 @@ details.bought .task{opacity:.7}
 .seg button,.chip{border:0;background:transparent;color:var(--muted);font:600 13px var(--body);padding:7px 13px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .chip{border:1px solid var(--rule);border-radius:999px}
-.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.chip[aria-pressed="true"]{border-color:var(--accent-text);color:var(--accent-text);background:var(--accent-soft)}
 
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 14px var(--body);padding:10px 15px;border-radius:12px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--accent-text)}
 .btn.small{font-size:13px;padding:6px 11px;border-radius:9px}
 .btn.danger{background:transparent;border-color:var(--red);color:var(--red)}
 .btn.block{width:100%}
@@ -83,7 +97,7 @@ input::placeholder,textarea::placeholder{color:var(--muted)}
 textarea{min-height:70px;resize:vertical}
 
 .list{background:var(--card);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
-.group-h{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);padding:12px 14px 6px;border-bottom:1px solid var(--rule)}
+.group-h{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-text);padding:12px 14px 6px;border-bottom:1px solid var(--rule)}
 .task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--rule)}
 .task:last-child{border-bottom:0}
 .check{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--accent);background:transparent;cursor:pointer;margin-top:1px;display:grid;place-items:center;color:var(--accent-ink);font-size:14px;padding:0}
@@ -92,7 +106,7 @@ textarea{min-height:70px;resize:vertical}
 .task .t{font-weight:600;overflow-wrap:anywhere}
 .task.done .t{text-decoration:line-through;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:12px;color:var(--muted);align-items:center}
-.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);white-space:nowrap}
 .pill.high,.pill.over{background:var(--red-soft);color:var(--red)}
 .pill.med,.pill.soon{background:var(--amber-soft);color:var(--amber)}
 .pill.low{background:var(--accent-soft);color:var(--muted)}
@@ -121,7 +135,7 @@ textarea{min-height:70px;resize:vertical}
 .lock-box form{display:flex;flex-direction:column;gap:10px;text-align:left}
 .pwrow{position:relative}
 .pwrow input{padding-right:64px}
-.pwrow button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--accent);font:700 12px var(--body);padding:8px;cursor:pointer}
+.pwrow button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--accent-text);font:700 12px var(--body);padding:8px;cursor:pointer}
 .rules{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12px;color:var(--muted)}
 .rules li::before{content:"○ ";color:var(--muted)}
 .rules li.ok{color:var(--ok)}
@@ -132,7 +146,7 @@ textarea{min-height:70px;resize:vertical}
 .fine{font-size:12px;color:var(--muted)}
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font:13px var(--body);cursor:pointer;padding:4px}
 
-.sheet-bg{position:fixed;inset:0;background:rgba(8,3,20,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet-bg{position:fixed;inset:0;background:rgba(35,26,48,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--card);border:1px solid var(--rule);border-bottom:0;width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
 .sheet form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -194,6 +208,7 @@ textarea{min-height:70px;resize:vertical}
     <header class="top-row">
       <div><span class="datechip" id="today"></span><h1>Lifestyle Organiser</h1></div>
       <div style="display:flex;gap:8px">
+        <button class="icon-btn" id="micBtn" aria-label="Speak a command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
         <button class="icon-btn" id="lockBtn" aria-label="Lock now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></button>
         <button class="icon-btn" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
       </div>
@@ -242,7 +257,7 @@ let thisYM=ym(now);
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const parse=s=>{if(!s)return null;const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
 const days=(a,b)=>Math.round((a-b)/864e5);
-const ymLabel=s=>{const [y,m]=s.split("-");return MON[+m-1]+" "+y.slice(2)};
+const ymLabel=s=>{const [y,m]=s.split("-");return MON[+m-1]+" "+y};
 const dueDate=(day,base)=>{const y=base.getFullYear(),m=base.getMonth();const last=new Date(y,m+1,0).getDate();return new Date(y,m,Math.min(Math.max(1,day||1),last))};
 const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
@@ -334,8 +349,9 @@ function examples(){
   {id:uid(),title:"Book dental check-up",space:"Personal",project:"Health",priority:"Low",due:plus(9),done:false,notes:""},
   {id:uid(),title:"Buy groceries",space:"Personal",project:"Errands",priority:"Medium",due:plus(-2),done:true,notes:""}],
  loans:[
-  {id:uid(),name:"Car loan",lender:"Example Bank",principal:3000000,rate:18,monthly:125000,dueDay:25,start:"2025-06-01",months:30,total:3750000,payments:monthsBetween("2025-06-01",lastMonth),notes:""},
-  {id:uid(),name:"Equipment loan",lender:"Example Microfinance",principal:800000,rate:15,monthly:72000,dueDay:5,start:"2026-03-01",months:12,total:864000,payments:monthsBetween("2026-03-01",thisYM),notes:""}],
+  {id:uid(),name:"Car loan",lender:"Example Bank",principal:3000000,rate:18,freq:"Monthly",monthly:125000,dueDay:25,start:"2025-06-01",months:30,total:3750000,payments:monthsBetween("2025-06-01",lastMonth),notes:""},
+  {id:uid(),name:"Equipment loan",lender:"Example Microfinance",principal:800000,rate:15,freq:"Monthly",monthly:72000,dueDay:5,start:"2026-03-01",months:12,total:864000,payments:monthsBetween("2026-03-01",thisYM),notes:""},
+  {id:uid(),name:"Cooperative loan",lender:"Staff cooperative",principal:1200000,rate:10,freq:"Yearly",monthly:440000,dueDay:15,start:"2026-03-15",months:36,total:1320000,payments:["2026-03"],notes:""}],
  savings:[
   {id:uid(),name:"Emergency fund",kind:"Savings",where:"Savings app",balance:450000,monthly:50000,rate:12,dueDay:28,maturity:"",contributions:[lastMonth],notes:""},
   {id:uid(),name:"Treasury bills",kind:"Investment",where:"Example Bank",balance:1000000,monthly:0,rate:18,dueDay:0,maturity:"2027-01-15",contributions:[],notes:""}],
@@ -365,12 +381,16 @@ function exampleExtras(plus){
       items:[line("Rice",1,false),line("Tomatoes",1,true),line("Pepper (tatashe & rodo)",2,true),line("Vegetable oil",1,false),line("Eggs",2,false),line("Onions",1,false),line("Detergent",2,false)]}]
   };
 }
-function normalize(d){const s=JSON.parse(JSON.stringify(d||{}));["tasks","loans","savings","expenses","catalog","lists"].forEach(k=>s[k]=s[k]||[]);s.budget=Number(s.budget)||0;s.examples=!!s.examples;return s}
+function normalize(d){const s=JSON.parse(JSON.stringify(d||{}));(s.loans||[]).forEach(l=>{if(!l.freq)l.freq="Monthly"});["tasks","loans","savings","expenses","catalog","lists"].forEach(k=>s[k]=s[k]||[]);s.budget=Number(s.budget)||0;s.examples=!!s.examples;return s}
 
 let state=null;
 let ui={tab:"todo",space:"All",filter:"Today"};
 try{const t=ls.get("lo-ui");if(t)ui=Object.assign(ui,JSON.parse(t))}catch(e){}
 const saveUI=()=>ls.set("lo-ui",JSON.stringify(ui));
+const THEMES={purple:["Purple","#6a3fd0"],gray:["Gray","#4a5361"],blue:["Blue","#1f5fd6"],orange:["Orange","#c2560c"]};
+function applyTheme(t){if(!THEMES[t])t="purple";document.documentElement.setAttribute("data-accent",t);ls.set("lo-theme",t);
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#fbf6ec")}
+applyTheme(ls.get("lo-theme")||"purple");
 
 let saveTimer=null,chain=Promise.resolve();
 const status=t=>{$("#saveStatus").textContent=t};
@@ -380,23 +400,40 @@ function persist(){clearTimeout(saveTimer);status("Saving…");saveTimer=setTime
 function change(fn){fn();render();persist()}
 
 /* ================= maths ================= */
+const FREQ={"Monthly":1,"Quarterly":3,"Every 6 months":6,"Yearly":12,"One-off":0};
+const FREQ_SHORT={"Monthly":"month","Quarterly":"quarter","Every 6 months":"6 months","Yearly":"year","One-off":"once"};
+const ymDate=m=>{const [y,mo]=m.split("-").map(Number);return new Date(y,mo-1,1)};
+function loanSchedule(l){
+  const n=FREQ[l.freq||"Monthly"];const st=parse(l.start)||new Date(now.getFullYear(),now.getMonth(),1);
+  const s0=new Date(st.getFullYear(),st.getMonth(),1);const months=Number(l.months)||0;
+  if(n===0)return[ym(new Date(s0.getFullYear(),s0.getMonth()+(months||0),1))];
+  const count=months?Math.max(1,Math.ceil(months/n)):240;const out=[];
+  for(let k=0;k<count;k++)out.push(ym(new Date(s0.getFullYear(),s0.getMonth()+k*n,1)));
+  return out;
+}
 function loanInfo(l){
-  const total=Number(l.total)||Number(l.monthly)*Number(l.months)||0;
-  const paidCount=(l.payments||[]).length;
-  const paid=Math.min(total,paidCount*Number(l.monthly||0));
-  const balance=Math.max(0,total-paid);
+  const freq=l.freq||"Monthly",n=FREQ[freq],amt=Number(l.monthly||0);
+  const sched=loanSchedule(l);const pays=l.payments||[];const isPaid=m=>pays.includes(m);
+  const total=Number(l.total)||amt*(Number(l.months)?sched.length:0)||0;
+  const paid=Math.min(total||Infinity,pays.length*amt);
+  const balance=Math.max(0,(total||0)-paid);
   const cleared=total>0&&balance<=0;
-  const paidThis=(l.payments||[]).includes(thisYM);
-  const due=paidThis?dueDate(l.dueDay,new Date(now.getFullYear(),now.getMonth()+1,1)):dueDate(l.dueDay,now);
-  const d=days(due,now);
+  const past=sched.filter(m=>m<=thisYM);const cur=past.length?past[past.length-1]:null;
+  const curPaid=!!cur&&isPaid(cur);
+  const target=sched.find(m=>!isPaid(m))||null;
+  const day=Number(l.dueDay)||(parse(l.start)?parse(l.start).getDate():1);
+  const due=target?dueDate(day,ymDate(target)):null;
+  const d=due?days(due,now):null;
   let pill;
-  if(cleared)pill=["paid","Cleared"];
-  else if(paidThis)pill=["paid",MON[now.getMonth()]+" paid"];
+  if(cleared||!target)pill=["paid","Cleared"];
   else if(d<0)pill=["over","Overdue "+(-d)+"d"];
+  else if(curPaid&&target>thisYM&&d>7)pill=["paid",(n===1?MON[ymDate(cur).getMonth()]:ymLabel(cur))+" paid"];
   else if(d<=7)pill=["soon",d===0?"Due today":"Due in "+d+"d"];
-  else pill=["","Due "+due.getDate()+" "+MON[due.getMonth()]];
-  const remainingMonths=l.monthly>0?Math.ceil(balance/l.monthly):0;
-  return{total,paid,balance,cleared,paidThis,due,d,pill,annual:Number(l.monthly||0)*12,remainingMonths,pct:total?paid/total*100:0};
+  else pill=["","Due "+due.getDate()+" "+MON[due.getMonth()]+(due.getFullYear()!==now.getFullYear()?" "+String(due.getFullYear()).slice(2):"")];
+  const perYear=n?amt*12/n:0;
+  const left=amt>0?Math.ceil(balance/amt):0;
+  const dueNow=!cleared&&target&&target<=thisYM;
+  return{freq,n,amt,sched,total,paid,balance,cleared,cur,curPaid,target,due,d,pill,perYear,left,dueNow,pct:total?paid/total*100:0};
 }
 function saveInfo(s){
   const done=(s.contributions||[]).includes(thisYM);
@@ -632,39 +669,42 @@ function taskRow(t){
 function renderLoans(){
   const infos=state.loans.map(l=>[l,loanInfo(l)]);
   const active=infos.filter(([,i])=>!i.cleared);
-  const totMonthly=active.reduce((a,[l])=>a+Number(l.monthly||0),0);
+  const perYear=active.reduce((a,[,i])=>a+i.perYear,0);
+  const oneOff=active.filter(([,i])=>i.n===0);
   const totOut=active.reduce((a,[,i])=>a+i.balance,0);
-  const unpaidAmt=active.filter(([,i])=>!i.paidThis).reduce((a,[l])=>a+Number(l.monthly||0),0);
-  const next=active.slice().sort((a,b)=>a[1].due-b[1].due)[0];
-  infos.sort((a,b)=>(a[1].cleared-b[1].cleared)||(a[1].due-b[1].due));
-  const M=MON[now.getMonth()];
+  const dueAmt=active.filter(([,i])=>i.dueNow).reduce((a,[,i])=>a+i.amt,0);
+  const next=active.filter(([,i])=>i.due).sort((a,b)=>a[1].due-b[1].due)[0];
+  infos.sort((a,b)=>(a[1].cleared-b[1].cleared)||((a[1].due||0)-(b[1].due||0)));
+  const fmtD=d=>d?d.getDate()+" "+MON[d.getMonth()]+(d.getFullYear()!==now.getFullYear()?" "+d.getFullYear():""):"–";
   $("#view-loans").innerHTML=`
   <div class="cards">
    <div class="tiles">
-    <div class="tile"><div class="lab">Monthly repayments</div><div class="val">${naira(totMonthly)}</div><div class="note">${active.length} active loan${active.length===1?"":"s"}</div></div>
-    <div class="tile"><div class="lab">Per year</div><div class="val">${naira(totMonthly*12)}</div><div class="note">monthly × 12</div></div>
-    <div class="tile"><div class="lab">Total outstanding</div><div class="val">${naira(totOut)}</div></div>
-    <div class="tile"><div class="lab">Still to pay in ${M}</div><div class="val" style="color:${unpaidAmt?"var(--amber)":"var(--ok)"}">${naira(unpaidAmt)}</div><div class="note">${next?"Next: "+esc(next[0].name)+", "+next[1].due.getDate()+" "+MON[next[1].due.getMonth()]:"Nothing due"}</div></div>
+    <div class="tile"><div class="lab">Due this month</div><div class="val" style="color:${dueAmt?"var(--amber)":"var(--ok)"}">${naira(dueAmt)}</div><div class="note">${dueAmt?"includes anything overdue":"nothing left to pay in "+MON[now.getMonth()]}</div></div>
+    <div class="tile"><div class="lab">Repayments per year</div><div class="val">${naira(perYear)}</div><div class="note">from each loan's schedule${oneOff.length?` · ${oneOff.length} one-off not included`:""}</div></div>
+    <div class="tile"><div class="lab">Total outstanding</div><div class="val">${naira(totOut)}</div><div class="note">${active.length} active loan${active.length===1?"":"s"}</div></div>
+    <div class="tile"><div class="lab">Next payment</div><div class="val" style="font-size:15px">${next?esc(next[0].name):"–"}</div><div class="note">${next?naira(next[1].amt)+" · "+fmtD(next[1].due):"Nothing due"}</div></div>
    </div>
    <div class="bar"><h2>Your loans</h2><button class="btn small" id="addLoan" style="margin-left:auto">+ Add loan</button></div>
-   ${infos.length?infos.map(([l,i])=>`
+   ${infos.length?infos.map(([l,i])=>{
+     const markYM=i.curPaid&&!(i.target&&i.target<=thisYM)?null:i.target;
+     return`
    <article class="card ${i.cleared?"cleared":""}">
-    <div class="top"><div><div class="name">${esc(l.name)}</div><div class="who">${esc(l.lender||"")}${l.rate?` · ${l.rate}% p.a.`:""}</div></div><span class="pill ${i.pill[0]}">${i.pill[1]}</span></div>
+    <div class="top"><div><div class="name">${esc(l.name)}</div><div class="who">${esc(l.lender||"")}${l.rate?` · ${l.rate}% p.a.`:""} · ${esc(i.freq)}</div></div><span class="pill ${i.pill[0]}">${i.pill[1]}</span></div>
     <div class="kv">
-     <div><div class="k">Monthly</div><div class="v">${naira(l.monthly)}</div></div>
-     <div><div class="k">Per year</div><div class="v">${naira(i.annual)}</div></div>
+     <div><div class="k">Repayment</div><div class="v">${naira(i.amt)} <span style="color:var(--muted);font-size:12px">/ ${FREQ_SHORT[i.freq]}</span></div></div>
+     <div><div class="k">${i.n?"Per year":"Payment type"}</div><div class="v">${i.n?naira(i.perYear):"Single payment"}</div></div>
      <div><div class="k">Balance left</div><div class="v">${naira(i.balance)}</div></div>
-     <div><div class="k">Due day</div><div class="v">${l.dueDay||"–"} monthly</div></div>
+     <div><div class="k">Next due</div><div class="v">${i.cleared?"–":fmtD(i.due)}</div></div>
     </div>
     <div class="prog" aria-label="${Math.round(i.pct)}% repaid"><i style="width:${i.pct.toFixed(1)}%"></i></div>
-    <div class="hist">${naira(i.paid)} repaid of ${naira(i.total)} · ${(l.payments||[]).length} payment${(l.payments||[]).length===1?"":"s"}${i.cleared?"":` · about ${i.remainingMonths} month${i.remainingMonths===1?"":"s"} left`}${(l.payments||[]).length?`<br>Recent: ${(l.payments||[]).slice().sort().slice(-4).map(ymLabel).join(", ")}`:""}</div>
-    <div class="actions">${i.cleared?"":`<button class="btn small ${i.paidThis?"ghost":""}" data-pay="${l.id}">${i.paidThis?"Undo "+M+" payment":"Mark "+M+" paid"}</button>`}
+    <div class="hist">${naira(i.paid)} repaid of ${naira(i.total)} · ${(l.payments||[]).length} payment${(l.payments||[]).length===1?"":"s"}${i.cleared?"":` · ${i.left} payment${i.left===1?"":"s"} left`}${(l.payments||[]).length?`<br>Recent: ${(l.payments||[]).slice().sort().slice(-4).map(ymLabel).join(", ")}`:""}</div>
+    <div class="actions">${i.cleared?"":(i.curPaid&&!markYM?`<button class="btn small ghost" data-pay="${l.id}" data-ym="${i.cur}">Undo ${ymLabel(i.cur)} payment</button>`:markYM?`<button class="btn small" data-pay="${l.id}" data-ym="${markYM}">Mark ${ymLabel(markYM)} paid</button>`:"")}
      <button class="btn ghost small" data-hist="${l.id}">Payments</button><button class="btn ghost small" data-editloan="${l.id}">Edit</button></div>
-   </article>`).join(""):`<div class="list"><div class="empty">No loans added. Tap “Add loan” to record one with its monthly repayment and due day.</div></div>`}
+   </article>`}).join(""):`<div class="list"><div class="empty">No loans added. Tap “Add loan” and choose how often you repay: monthly, quarterly, every 6 months, yearly or once.</div></div>`}
   </div>`;
   $("#addLoan").onclick=()=>openForm("loan");
-  document.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>change(()=>{const l=state.loans.find(x=>x.id===b.dataset.pay);l.payments=l.payments||[];
-    l.payments=l.payments.includes(thisYM)?l.payments.filter(m=>m!==thisYM):[...l.payments,thisYM]}));
+  document.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>change(()=>{const l=state.loans.find(x=>x.id===b.dataset.pay);const m=b.dataset.ym;l.payments=l.payments||[];
+    l.payments=l.payments.includes(m)?l.payments.filter(x=>x!==m):[...l.payments,m]}));
   document.querySelectorAll("[data-editloan]").forEach(b=>b.onclick=()=>openForm("loan",state.loans.find(x=>x.id===b.dataset.editloan)));
   document.querySelectorAll("[data-hist]").forEach(b=>b.onclick=()=>openHistory(state.loans.find(x=>x.id===b.dataset.hist)));
 }
@@ -706,7 +746,7 @@ function renderSavings(){
 /* ================= sheets ================= */
 const FIELDS={
  task:[["title","To-do","text",1],["space","Space","select",0,["Work","Personal"]],["project","Project","text",0,null,"projList"],["priority","Priority","select",0,["High","Medium","Low"]],["due","Due date","date"],["notes","Notes","textarea",1]],
- loan:[["name","Loan name","text",1],["lender","Lender","text"],["principal","Amount borrowed (₦)","number"],["rate","Interest rate (% a year)","number"],["monthly","Monthly repayment (₦)","number"],["dueDay","Due day of month (1–31)","number"],["start","Start date","date"],["months","Tenor (months)","number"],["total","Total to repay (₦)","number",1],["notes","Notes","textarea",1]],
+ loan:[["name","Loan name","text",1],["lender","Lender","text"],["principal","Amount borrowed (₦)","number"],["rate","Interest rate (% a year)","number"],["freq","How often you repay","select",0,Object.keys(FREQ)],["monthly","Amount per repayment (₦)","number"],["start","First repayment date","date"],["months","Loan length (months)","number"],["dueDay","Due day of month (optional)","number"],["total","Total to repay (₦)","number"],["notes","Notes","textarea",1]],
  saving:[["name","Name","text",1],["kind","Type","select",0,["Savings","Investment"]],["where","Where (bank, app)","text"],["balance","Current balance (₦)","number"],["monthly","Monthly contribution (₦)","number"],["rate","Interest / return (% a year)","number"],["dueDay","Contribution day (1–31)","number"],["maturity","Maturity date","date"],["notes","Notes","textarea",1]],
  expense:[["amount","Amount (₦)","number"],["date","Date","date"],["category","Category","select",0,EXP_CATS],["method","Paid by","select",0,["Cash","Transfer","Card","POS"]],["note","What was it for?","text",1],["space","Personal or work","select",1,["Personal","Work"]]],
  mitem:[["name","Item name","text",1],["unit","Unit (kg, bag, pack…)","text"],["price","Usual price (₦)","number"],["category","Category","select",1,MKT_CATS]]
@@ -716,17 +756,17 @@ const COLL={task:"tasks",loan:"loans",saving:"savings",expense:"expenses",mitem:
 let sheetKind=null,sheetItem=null;
 function openSheet(title,html){$("#sheetTitle").textContent=title;$("#sheetForm").innerHTML=html;$("#sheetBg").hidden=false}
 function closeSheet(){$("#sheetBg").hidden=true;$("#sheetForm").innerHTML="";$("#sheetForm").onsubmit=null}
-function openForm(kind,item){
+function openForm(kind,item,prefill){
   sheetKind=kind;sheetItem=item||null;
   const M=ui.expMonth||thisYM;
-  const v=item||(kind==="task"?{space:ui.space==="All"?"Work":ui.space,priority:"Medium"}:kind==="saving"?{kind:"Savings"}:
-    kind==="expense"?{date:M===thisYM?iso(now):M+"-01",category:"Food & groceries",method:"Transfer",space:"Personal"}:kind==="mitem"?{category:"Grains & staples"}:{});
+  const v=item||Object.assign(kind==="task"?{space:ui.space==="All"?"Work":ui.space,priority:"Medium"}:kind==="saving"?{kind:"Savings"}:kind==="loan"?{freq:"Monthly"}:
+    kind==="expense"?{date:M===thisYM?iso(now):M+"-01",category:"Food & groceries",method:"Transfer",space:"Personal"}:kind==="mitem"?{category:"Grains & staples"}:{},prefill||{});
   openSheet((item?"Edit ":"New ")+TITLES[kind],FIELDS[kind].map(([k,l,t,full,opts,list])=>{
     const val=esc(v[k]??""),id="f-"+kind+"-"+k;
     const ctl=t==="select"?`<select id="${id}" name="${k}">${opts.map(o=>`<option ${v[k]===o?"selected":""}>${o}</option>`).join("")}</select>`:
       t==="textarea"?`<textarea id="${id}" name="${k}">${val}</textarea>`:
       `<input id="${id}" name="${k}" type="${t}" value="${val}" ${t==="number"?'inputmode="decimal" step="any" min="0"':""} ${list?`list="${list}"`:""} ${k==="title"||k==="name"?"required":""}>`;
-    const hint=kind==="loan"&&k==="total"?`<span>Leave blank to use monthly × tenor.</span>`:"";
+    const hint=kind==="loan"&&k==="total"?`<span>Blank = amount × number of repayments.</span>`:kind==="loan"&&k==="dueDay"?`<span>Blank = same day as the first repayment.</span>`:kind==="loan"&&k==="months"?`<span>One-off: months until it's due.</span>`:"";
     return`<label class="${full?"full":""}" for="${id}">${l}${ctl}${hint}</label>`}).join("")+
    `<div class="foot">${item?`<button type="button" class="btn danger small" id="delBtn">Delete</button>`:"<span></span>"}<div><button type="button" class="btn ghost" id="cancelBtn">Cancel</button><button type="submit" class="btn">Save</button></div></div>`);
   $("#cancelBtn").onclick=closeSheet;
@@ -735,17 +775,18 @@ function openForm(kind,item){
   $("#sheetForm").onsubmit=e=>{
     e.preventDefault();const fd=new FormData(e.target),o={};
     FIELDS[kind].forEach(([k,,t])=>{let x=fd.get(k);if(t==="number")x=x===""||x==null?"":Number(x);o[k]=typeof x==="string"?x.trim():x});
-    if(kind==="loan"&&!o.total)o.total=(Number(o.monthly)||0)*(Number(o.months)||0);
+    if(kind==="loan"&&!o.total){const n=FREQ[o.freq];o.total=(Number(o.monthly)||0)*(n===0?1:(Number(o.months)?Math.max(1,Math.ceil(Number(o.months)/n)):0))}
     change(()=>{if(sheetItem)Object.assign(sheetItem,o);
       else{const base=kind==="task"?{done:false}:kind==="loan"?{payments:[]}:kind==="saving"?{contributions:[]}:{};state[COLL[kind]].unshift(Object.assign({id:uid()},base,o))}});
     closeSheet();
   };
 }
 function openHistory(l){
-  const start=parse(l.start)||new Date(now.getFullYear(),now.getMonth()-11,1);
-  const ms=monthsBetween(iso(start),ym(new Date(now.getFullYear(),now.getMonth()+2,1))).slice(-36);
-  openSheet("Payments · "+l.name,`<p class="sub full">Tick each month you've paid. Each tick counts as ${naira(l.monthly)}.</p>`+
-    ms.map(m=>`<label class="full" style="flex-direction:row;align-items:center;gap:10px;font-size:14px;color:var(--ink)"><input type="checkbox" style="width:auto" id="pm-${m}" data-m="${m}" ${(l.payments||[]).includes(m)?"checked":""}> ${ymLabel(m)}</label>`).join("")+
+  const i=loanInfo(l);const horizon=ym(new Date(now.getFullYear(),now.getMonth()+(i.n||12),1));
+  let ms=i.sched.filter(m=>m<=horizon);if(!ms.length)ms=i.sched.slice(0,1);ms=ms.slice(-36);
+  const extra=(l.payments||[]).filter(m=>!i.sched.includes(m));
+  openSheet("Payments · "+l.name,`<p class="sub full">Tick each repayment you've made (${esc(i.freq.toLowerCase())}). Each tick counts as ${naira(i.amt)}.</p>`+
+    ms.concat(extra).map(m=>`<label class="full" style="flex-direction:row;align-items:center;gap:10px;font-size:14px;color:var(--ink)"><input type="checkbox" style="width:auto" id="pm-${m}" data-m="${m}" ${(l.payments||[]).includes(m)?"checked":""}> ${ymLabel(m)}${m>thisYM?" (upcoming)":""}</label>`).join("")+
     `<div class="foot"><span></span><div><button type="button" class="btn" id="histDone">Done</button></div></div>`);
   $("#sheetForm").querySelectorAll("[data-m]").forEach(c=>c.onchange=()=>change(()=>{const m=c.dataset.m;l.payments=l.payments||[];
     l.payments=c.checked?[...new Set([...l.payments,m])]:l.payments.filter(x=>x!==m)}));
@@ -755,7 +796,9 @@ function openHistory(l){
 /* settings: change password, backup, restore, erase */
 function openSettings(){
   openSheet("Settings",`
-   <div class="set-sec" style="border-top:0;padding-top:0"><h3>Change password</h3>
+   <div class="set-sec" style="border-top:0;padding-top:0"><h3>Colour theme</h3>
+    <div class="swatches">${Object.entries(THEMES).map(([k,[n,c]])=>`<button type="button" class="sw" data-theme-pick="${k}" aria-pressed="${(document.documentElement.getAttribute("data-accent")||"purple")===k}"><i style="background:${c}"></i>${n}</button>`).join("")}</div></div>
+   <div class="set-sec"><h3>Change password</h3>
     <label for="cp0">Current password<input id="cp0" type="password" autocomplete="current-password"></label>
     <label for="cp1">New password<input id="cp1" type="password" autocomplete="new-password"></label>
     <div class="meter"><i id="cpMeter"></i></div>
@@ -771,6 +814,7 @@ function openSettings(){
    <div class="set-sec"><h3>Auto-lock</h3><p>The app locks itself after 60 seconds in the background. Use the lock button at the top to lock right away.</p></div>
    <div class="foot"><span></span><div><button type="button" class="btn" id="setDone">Done</button></div></div>`);
   wireStrength($("#cp1"),$("#cp2"),$("#cpRules"),$("#cpMeter"),$("#cpBtn"));
+  document.querySelectorAll("[data-theme-pick]").forEach(b=>b.onclick=()=>{applyTheme(b.dataset.themePick);document.querySelectorAll("[data-theme-pick]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   $("#setDone").onclick=closeSheet;
   $("#cpBtn").onclick=async()=>{
     $("#cpErr").textContent="";
@@ -798,12 +842,119 @@ function openRestore(fromLock){
     catch(e){$("#rsErr").textContent="That code or password didn't work. Check you pasted the whole code."}};
 }
 
+
+/* ================= voice commands ================= */
+const NUMW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,a:1,an:1};
+function parseAmount(t){
+  const m=t.match(/(?:₦|n|ngn)?\s*(\d[\d,]*(?:\.\d+)?)\s*(k|thousand|m|million)?\s*(?:naira)?/i);
+  if(!m)return null;let v=parseFloat(m[1].replace(/,/g,""));const u=(m[2]||"").toLowerCase();
+  if(u==="k"||u==="thousand")v*=1000;if(u==="m"||u==="million")v*=1e6;return Math.round(v);
+}
+function parseWhen(t){
+  t=t.toLowerCase();const d=new Date(now);
+  if(/\btoday\b|\btonight\b/.test(t))return iso(d);
+  if(/\btomorrow\b/.test(t)){d.setDate(d.getDate()+1);return iso(d)}
+  if(/\bnext week\b/.test(t)){d.setDate(d.getDate()+7);return iso(d)}
+  const wd=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+  for(let i=0;i<7;i++)if(new RegExp("\\b"+wd[i]+"\\b").test(t)){let k=(i-d.getDay()+7)%7||7;d.setDate(d.getDate()+k);return iso(d)}
+  const on=t.match(/\bon the (\d{1,2})(?:st|nd|rd|th)?\b/);if(on){const n=+on[1];let x=new Date(d.getFullYear(),d.getMonth(),n);if(x<d)x=new Date(d.getFullYear(),d.getMonth()+1,n);return iso(x)}
+  return "";
+}
+const stripWhen=t=>t.replace(/\b(today|tonight|tomorrow|next week|on (sunday|monday|tuesday|wednesday|thursday|friday|saturday)|(sunday|monday|tuesday|wednesday|thursday|friday|saturday)|on the \d{1,2}(st|nd|rd|th)?)\b/gi,"").replace(/\s{2,}/g," ").trim();
+const CAT_WORDS=[["Transport",/fuel|petrol|diesel|transport|uber|bolt|bus|danfo|keke|okada|ride|taxi|cab/],["Rent & housing",/rent|service charge|caution fee/],["Bills & utilities",/light|electricity|nepa|token|water bill|bill|dstv|gotv|startimes|waste/],["Data & airtime",/data|airtime|recharge|subscription for mtn|mtn|glo|airtel|9mobile/],["Food & groceries",/food|market|groceries|grocery|foodstuff|supermarket|rice|beans|bread|lunch|dinner|breakfast|snacks/],["Health",/hospital|drug|drugs|pharmacy|doctor|clinic|medicine|test/],["Family & gifts",/gift|birthday|family|church|tithe|offering|wedding|support|mum|dad|mother|father/],["Personal care",/hair|salon|barber|cloth|clothes|shoe|make ?up|nails/],["Entertainment",/movie|cinema|netflix|showmax|outing|party|game/],["Business",/business|client|software|credits|subscription|capcut|website|hosting|domain|ads|printing/],["Savings",/savings|save|piggyvest|cowrywise/],["Loan repayment",/loan/]];
+const guessCat=t=>{for(const [c,re] of CAT_WORDS)if(re.test(t.toLowerCase()))return c;return "Other"};
+const cap1=t=>t?t.charAt(0).toUpperCase()+t.slice(1):t;
+function interpret(raw){
+  const t=raw.trim().replace(/[.!?]+$/,"");const lo=t.toLowerCase();
+  if(!t)return null;
+  // loan paid
+  let m=lo.match(/\b(?:i )?(?:have )?paid (?:my |the )?(.+?) loan\b/);
+  if(m){const name=m[1].trim();const l=state.loans.find(x=>x.name.toLowerCase().includes(name)||name.includes(x.name.toLowerCase().replace(/ loan$/,"")));
+    if(l){const i=loanInfo(l);if(i.target)return{kind:"loanpay",loan:l,ym:i.target,summary:`Mark ${l.name} as paid for ${ymLabel(i.target)} (${naira(i.amt)})`}}}
+  // expense
+  if(/\b(spent|spend|paid|pay for|bought|used)\b/.test(lo)&&parseAmount(lo)){
+    const amount=parseAmount(lo);m=lo.match(/\b(?:on|for)\s+(.+)$/);
+    let note=m?m[1]:lo.replace(/.*?\b(spent|spend|paid|bought|used)\b/,"").replace(/(?:₦|n|ngn)?\s*\d[\d,]*(?:\.\d+)?\s*(k|thousand|m|million)?\s*(naira)?/,"");
+    note=stripWhen(note.replace(/^(on|for)\s+/,"")).replace(/\b(by|with|via|in) (card|cash|transfer|pos)\b/,"").replace(/\b(for work|work)\b/,"").replace(/\s{2,}/g," ").trim();
+    const date=parseWhen(lo)||iso(now);
+    const values={amount,note:cap1(note),category:guessCat(lo),date,space:/\bwork|client|business\b/.test(lo)?"Work":"Personal",method:/\bcash\b/.test(lo)?"Cash":/\bcard\b/.test(lo)?"Card":/\bpos\b/.test(lo)?"POS":"Transfer"};
+    return{kind:"expense",values,summary:`Add expense: ${naira(amount)} · ${values.category}${values.note?" · "+values.note:""}`};
+  }
+  // shopping
+  m=lo.match(/^(?:please )?(?:add|put)\s+(.+?)\s+(?:to|on|in)\s+(?:my |the )?(?:shopping|market)(?: list)?$/)||lo.match(/^(?:i need to buy|buy|i need)\s+(.+)$/);
+  if(m){const items=m[1].split(/,|\band\b/).map(x=>x.trim()).filter(Boolean).map(x=>{const q=x.match(/^(\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|a|an)\s+(.+)$/);
+      let qty=1,name=x;if(q){qty=NUMW[q[1]]||parseFloat(q[1])||1;name=q[2]}
+      name=name.replace(/^(bag|bags|crate|crates|pack|packs|tin|tins|carton|cartons|bottle|bottles|kg|paint bucket|basket) of /,"");return{qty,name:cap1(name)}});
+    return{kind:"shop",items,summary:"Add to shopping list: "+items.map(i=>`${i.qty} × ${i.name}`).join(", ")}}
+  // task (default)
+  let title=t.replace(/^(?:please )?(?:remind me to|add (?:a )?(?:task|to-?do|reminder)(?: to)?|to-?do:?|task:?|i need to|i have to|i must)\s+/i,"");
+  const due=parseWhen(title);title=stripWhen(title).replace(/\b(for work|it's urgent|urgent|important)\b/gi,"").replace(/\s{2,}/g," ").trim();
+  const values={title:cap1(title),due,space:/\b(work|client|office|business)\b/.test(lo)?"Work":"Personal",priority:/\b(urgent|important|asap)\b/.test(lo)?"High":"Medium"};
+  return{kind:"task",values,summary:`Add to-do: ${values.title}${due?" · due "+due:""} · ${values.space}`};
+}
+function applyCommand(r){
+  if(r.kind==="task"){closeSheet();ui.tab="todo";saveUI();render();openForm("task",null,r.values);return}
+  if(r.kind==="expense"){closeSheet();ui.tab="expenses";ui.expMonth=r.values.date.slice(0,7);saveUI();render();openForm("expense",null,r.values);return}
+  if(r.kind==="loanpay"){change(()=>{r.loan.payments=[...new Set([...(r.loan.payments||[]),r.ym])]});closeSheet();ui.tab="loans";saveUI();render();toast(r.loan.name+" marked paid");return}
+  if(r.kind==="shop"){
+    let L=state.lists.find(x=>x.id===ui.openList)||state.lists.find(x=>x.items.some(i=>!i.bought)||!x.items.length);
+    change(()=>{
+      if(!L){L={id:uid(),name:"Market run · "+now.getDate()+" "+MON[now.getMonth()],date:iso(now),recorded:false,items:[]};state.lists.unshift(L)}
+      r.items.forEach(it=>{let c=state.catalog.find(x=>x.name.toLowerCase()===it.name.toLowerCase())||state.catalog.find(x=>x.name.toLowerCase().includes(it.name.toLowerCase())||it.name.toLowerCase().includes(x.name.toLowerCase()));
+        if(!c){c={id:uid(),name:it.name,unit:"",price:0,category:"Other"};state.catalog.push(c)}
+        const ex=L.items.find(l=>l.itemId===c.id&&!l.bought);if(ex)ex.qty=Number(ex.qty||0)+it.qty;else L.items.push({id:uid(),itemId:c.id,name:c.name,unit:c.unit,qty:it.qty,price:c.price||0,bought:false})});
+      ui.tab="market";ui.mview="lists";ui.openList=L.id;saveUI();
+    });
+    closeSheet();toast("Added to "+L.name);return}
+}
+let listening=false;
+async function listen(){
+  const capx=window.Capacitor;const native=capx&&capx.isNativePlatform&&capx.isNativePlatform();
+  if(native){
+    const SR=(capx.Plugins&&capx.Plugins.SpeechRecognition)||(capx.registerPlugin&&capx.registerPlugin("SpeechRecognition"));
+    if(!SR){toast("Voice isn't available on this phone. Type it instead.");return null}
+    try{const p=await SR.requestPermissions();if(p&&p.speechRecognition&&p.speechRecognition!=="granted"){toast("Allow microphone access to use voice");return null}
+      const r=await SR.start({language:"en-US",maxResults:1,prompt:"Say what to add",partialResults:false,popup:true});
+      return r&&r.matches&&r.matches[0]||null}
+    catch(e){toast("Didn't catch that. Try again or type it.");return null}
+  }
+  const W=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!W){toast("Voice isn't available here. Type your command instead.");return null}
+  return new Promise(res=>{try{const rec=new W();rec.lang="en-US";rec.maxAlternatives=1;let got=null;
+    rec.onresult=e=>{got=e.results[0][0].transcript};rec.onerror=()=>{toast("Voice isn't available here. Type your command instead.")};rec.onend=()=>res(got);rec.start()}catch(e){toast("Voice isn't available here. Type your command instead.");res(null)}});
+}
+function openVoice(autostart){
+  openSheet("Tell me what to add",`
+   <button type="button" class="mic-big full" id="vMic" aria-label="Tap and speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+   <p class="fine full" style="text-align:center;margin:0" id="vState">Tap the mic and speak, or type below.</p>
+   <label class="full" for="vText">What do you want to add?<input id="vText" placeholder="e.g. Spent 5,000 on fuel" autocomplete="off"></label>
+   <div class="full card" id="vResult" hidden style="padding:12px;gap:6px"></div>
+   <div class="voice-eg full"><span>Try saying:</span>
+    <button type="button" data-eg="Remind me to call the client tomorrow for work">“Remind me to call the client tomorrow for work”</button>
+    <button type="button" data-eg="Spent 5,000 on fuel">“Spent 5,000 on fuel”</button>
+    <button type="button" data-eg="Add 2 crates of eggs and rice to my shopping list">“Add 2 crates of eggs and rice to my shopping list”</button>
+    <button type="button" data-eg="I paid my car loan">“I paid my car loan”</button></div>
+   <div class="foot"><span></span><div><button type="button" class="btn ghost" id="vCancel">Cancel</button><button type="submit" class="btn" id="vGo">Continue</button></div></div>`);
+  let pending=null;
+  const show=()=>{const t=$("#vText").value;pending=interpret(t);const box=$("#vResult");
+    if(!pending){box.hidden=true;return}box.hidden=false;box.innerHTML=`<span class="fine">I'll do this:</span><strong>${esc(pending.summary)}</strong>`};
+  $("#vText").oninput=show;
+  document.querySelectorAll("[data-eg]").forEach(b=>b.onclick=()=>{$("#vText").value=b.dataset.eg;show()});
+  $("#vCancel").onclick=closeSheet;
+  $("#sheetForm").onsubmit=e=>{e.preventDefault();show();if(pending)applyCommand(pending);else toast("Say or type what to add first")};
+  const go=async()=>{if(listening)return;listening=true;$("#vMic").classList.add("on");$("#vState").textContent="Listening…";
+    const heard=await listen();listening=false;const mb=$("#vMic");if(!mb)return;mb.classList.remove("on");
+    if(heard){$("#vText").value=heard;$("#vState").textContent="Heard you. Check it, then tap Continue.";show()}else $("#vState").textContent="Tap the mic and speak, or type below."};
+  $("#vMic").onclick=go;
+  const capx=window.Capacitor;if(autostart&&capx&&capx.isNativePlatform&&capx.isNativePlatform())go();
+}
 $("#sheetBg").addEventListener("click",e=>{if(e.target.id==="sheetBg")closeSheet()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ui.tab=b.dataset.tab;saveUI();render()});
 $("#clearEx").onclick=()=>change(()=>{state=normalize({examples:false});ui.openList=null});
 $("#lockBtn").onclick=()=>showLock("unlock");
 $("#settingsBtn").onclick=openSettings;
+$("#micBtn").onclick=()=>openVoice(true);
 
 if(PREVIEW){state=normalize(examples());$("#previewNote").hidden=false;$("#lockBtn").onclick=()=>toast("The lock works in the installed app");showApp();status("Preview: changes aren't saved")}
 else if(!window.crypto||!crypto.subtle){$("#lockSub").textContent="This browser can't encrypt data, so the app can't open here.";}
